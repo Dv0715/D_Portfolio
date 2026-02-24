@@ -114,28 +114,77 @@ body::before {
 
 /* 彈窗背景遮罩 */
 .modal-overlay {
+    display: none !important; 
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(44, 36, 33, 0.75); 
-    display: none !important; 
+    
+    /* 核心修正：使用 flex 居中 */
     justify-content: center;
-    /* 關鍵：預設維持 flex-start (頂部對齊) */
-    align-items: flex-start; 
+    align-items: center;      
+    padding: 20px;            /* 這是最後的保險邊距 */
+    box-sizing: border-box;   /* 確保 padding 不會撐破容器 */
+    
     z-index: 99999;
     backdrop-filter: blur(5px);
-    overflow-y: auto;          /* 允許垂直捲動 */
-    -webkit-overflow-scrolling: touch;
 }
 /* 彈窗主體 - 延續畫框感 */
 .modal-content {
-    background: #2c2421; /* 炭咖啡色，呼應畫框色 */
-    padding: 45px;
-    border-radius: 2px;
-    max-width: 550px;
+    background: #2c2421; 
+    padding: 25px 15px;      /* 手機版左右內距縮小，釋放文字空間 */
+    border-radius: 4px;
+    width: 90%;
+    max-width: 500px;
+    margin: 0;
+    max-height: 85vh;
+    overflow-y: auto;        /* 只保留垂直捲動 */
+    overflow-x: hidden;      /* 嚴禁左右捲動 */
+    scrollbar-width: thin;
+    scrollbar-color: #7d5e53 #2c2421;
     border: 1px solid #4a3b35;
-    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
-    margin: 40px 20px; /* 增加上下邊距，避免貼齊邊緣 */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    -webkit-overflow-scrolling: touch; 
+}
+
+
+.modal-content::-webkit-scrollbar {
+    width: 4px;
+}
+.modal-content::-webkit-scrollbar-track {
+    background: #2c2421;
+}
+.modal-content::-webkit-scrollbar-thumb {
+    background: #7d5e53;
+    border-radius: 10px;
+}
+
+/* 讓彈窗內容主體與底框保持精緻的留白 */
+.modal-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;    /* 整體水平居中 */
+    text-align: center;     /* 文字預設置中 */
+    width: 100%;
+    padding-bottom: 30px;   /* 確保最下方跟底框有間距 */
+}
+/* 針對有側邊標示（左邊橘條）的區塊，我們維持左對齊比較專業 */
+.modal-body p[style*="border-left"] {
+    text-align: left;
+    width: 100%;            /* 確保寬度足夠顯示邊框 */
+    max-width: 420px;       /* 限制寬度讓它在中間更集中 */
+    margin-left: auto;
+    margin-right: auto;
+}
+/* 讓條列清單在手機版維持左對齊但區塊置中 */
+.modal-body ul {
+    display: inline-block;
+    text-align: left;
+    padding-left: 20px;
+    margin: 0 auto;
+    width: fit-content;
 }
 /* 標題與文字顏色調整 */
 .modal-inner h2 {
@@ -147,6 +196,48 @@ body::before {
     font-size: 0.95rem;
     line-height: 1.8;
 }
+
+/* 針對手機版 (max-width: 768px) 的文字優化 */
+@media (max-width: 768px) {
+    /* 1. 增加彈窗主體的內距，強制內文向內靠攏 */
+    .modal-content {
+        padding: 35px 30px !important; /* 增加左右內距到 30px，確保文字遠離邊緣 */
+        width: 85%;                   /* 稍微縮小寬度，讓整體更像懸浮卡片 */
+    }
+
+    
+/* 2. 解決右邊離邊條太近的核心：將雙欄改為單欄排列 */
+    .modal-body div[style*="display: grid"] {
+        grid-template-columns: 1fr !important; /* 強制單欄，釋放水平空間 */
+        gap: 25px !important;                 /* 增加上下項目的間距 */
+        text-align: left;                     /* 保持左對齊 */
+    }
+
+/* 3. 調整文字大小以適應新空間 */
+    .modal-body p, .modal-body li {
+        font-size: 0.88rem !important;
+        line-height: 1.7 !important;
+    }
+
+/* 4. 確保左側有橘色標記的區塊不會因為過窄而顯得侷促 */
+    .modal-body p[style*="border-left"] {
+        padding-left: 15px !important;
+        margin-bottom: 25px !important;
+    }
+
+    /* 聯絡按鈕縮小，避免在窄螢幕破版 */
+    .contact-cta {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+
+
+
+
+
+
 /* 新增：技能標籤樣式 */
 .skill-tags {
     display: flex;
@@ -192,7 +283,7 @@ body::before {
 /* 針對手機版的微調 */
 @media (max-width: 768px) {
     .close-modal {
-        top: 15px;
+        top: -3px;
         right: 15px;
         font-size: 40px; /* 手機版再放大一點點，方便手指操作 */
     }
@@ -258,12 +349,13 @@ body::before {
 
 /* --- 打字機核心動畫 --- */
 .typewriter-effect {
-    display: inline-block;
+    display: block;
+    margin: 0 auto;
     overflow: hidden;
     white-space: nowrap;
     /* 初始狀態就有邊框，但顏色透明 */
     border-right: 3px solid transparent; 
-    width: 0;
+    width: fit-content;
 }
 
 /* 當彈窗啟動時觸發 */
