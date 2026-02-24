@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dolores Portfolio</title>
+<style>
+
+    /* --- 基礎樣式 --- */
+    body {
+    margin: 0; padding: 0;
+    /* 牆面質感：底色 + 淡淡的噴砂顆粒感 */
+    background-color: #f8f8f6;
+    background-image: 
+        radial-gradient(#e5e5e0 1px, transparent 0),
+        radial-gradient(#e5e5e0 1px, transparent 0);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+    font-family: "PingFang TC", sans-serif;
+    overflow-x: hidden;
+    scrollbar-gutter: stable; /* 即使沒有滾動條，也會預留空間，防止位移 */
+}
+
+/* 增加一個環境光效果 */
+body::before {
+    content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 50% 30%, transparent 0%, rgba(0,0,0,0.02) 100%);
+    pointer-events: none; /* 重要：讓滑鼠點擊穿透 */
+    z-index: 1;
+}
+    .header { 
+    position: relative; 
+    z-index: 100; 
+    text-align: center; 
+    padding: 60px 20px; 
+    background-color: #fff; 
+}
+    
+/* 新增按鈕專屬樣式 */
+.contact-cta {
+    display: inline-block;
+    background-color: #7d5e53; /* 妳的標誌暖褐色 */
+    color: #fff !important;
+    text-decoration: none;
+    padding: 15px 40px;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.contact-cta:hover {
+    background-color: #a68b7c; /* 較淺的褐色，產生互動感 */
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+
+
+    /* --- Header 佈局 --- */
+    .header-container { display: flex; align-items: center; justify-content: center; max-width: 1000px; margin: 0 auto; gap: 40px; }
+    .profile-container { position: relative; width: 180px; height: 140px; display: flex; justify-content: center; align-items: center; }
+    .profile-arc { position: absolute; width: 120px; height: 120px; border-radius: 50%; background-color: #e0e0e0; bottom: 6px; z-index: 0; animation: shadow-scale 4s ease-in-out infinite; }
+    .profile-img { position: relative; z-index: 1; width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background-color: #eee; animation: floating 4s ease-in-out infinite; }
+    
+    @keyframes floating { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+    @keyframes shadow-scale { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.85); opacity: 0.4; } }
+
+    .header-text { text-align: left; flex: 1; max-width: 600px; }
+    .header h1 { font-size: 2.8rem; letter-spacing: 0.2em; margin: 0; font-weight: 400; }
+    .header { 
+    position: relative; 
+    z-index: 100; 
+    text-align: center; 
+    padding: 60px 20px; 
+    background-color: #fff; 
+}
+.gallery-container { 
+    position: relative; 
+    z-index: 10; 
+}
+    .subtitle { color: #7d5e53; font-weight: bold; margin: 10px 0; }
+    .description { margin: 0; font-size: 0.9rem; color: #888; line-height: 1.6; }
+
+/* 讓頭像跟按鈕垂直對齊 */
+.profile-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0px; /* 將間距設為 0，改用 margin 微調 */
+}
+
+.about-me-btn {
+    background-color: transparent;
+    border: 1.2px solid #7d5e53;
+    color: #7d5e53;
+    padding: 6px 20px;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.about-me-btn:hover {
+    background-color: #7d5e53;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(125, 94, 83, 0.2);
+}
+
+/* 彈窗背景遮罩 */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(44, 36, 33, 0.75); 
+    display: none !important; 
+    justify-content: center;
+    /* 關鍵：預設維持 flex-start (頂部對齊) */
+    align-items: flex-start; 
+    z-index: 99999;
+    backdrop-filter: blur(5px);
+    overflow-y: auto;          /* 允許垂直捲動 */
+    -webkit-overflow-scrolling: touch;
+}
+/* 彈窗主體 - 延續畫框感 */
+.modal-content {
+    background: #2c2421; /* 炭咖啡色，呼應畫框色 */
+    padding: 45px;
+    border-radius: 2px;
+    max-width: 550px;
+    border: 1px solid #4a3b35;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    margin: 40px 20px; /* 增加上下邊距，避免貼齊邊緣 */
+}
+/* 標題與文字顏色調整 */
+.modal-inner h2 {
+    color: #d7ccc8 !important; /* 淺米色標題 */
+    border-bottom: 2px solid #7d5e53;
+}
+.modal-body p {
+    color: #bcaaa4; /* 柔和的文字色 */
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+/* 新增：技能標籤樣式 */
+.skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+}
+.skill-tag {
+    background: rgba(125, 94, 83, 0.2);
+    color: #a68b7c;
+    border: 1px solid #7d5e53;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+}
+.modal-overlay.active { 
+    display: flex !important; /* 強制開啟 */
+}
+.modal-overlay.active .modal-content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* 關閉按鈕 */
+.close-modal {
+    position: fixed; /* 改為 fixed，不隨內容捲動 */
+    top: 20px;       /* 與頂部保持距離 */
+    right: 25px;      /* 與右側保持距離 */
+    font-size: 35px;  /* 稍微放大，手機比較好點擊 */
+    cursor: pointer;
+    color: #d7ccc8;   /* 改為淺色，在深色背景下更明顯 */
+    line-height: 1;
+    z-index: 100001;  /* 確保層級高於彈窗內容 */
+    padding: 10px;    /* 增加點擊區域 */
+    transition: color 0.3s ease;
+}
+
+.close-modal:hover {
+    color: #7d5e53;
+}
+
+/* 針對手機版的微調 */
+@media (max-width: 768px) {
+    .close-modal {
+        top: 15px;
+        right: 15px;
+        font-size: 40px; /* 手機版再放大一點點，方便手指操作 */
+    }
+}
+
+/* 微塵特效 */
+.ambient-particles {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 2;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px);
+    background-size: 100px 100px;
+    animation: particles-drift 20s linear infinite;
+    opacity: 0.3;
+}
+
+@keyframes particles-drift {
+    from { transform: translateY(0) translateX(0); }
+    to { transform: translateY(-100px) translateX(20px); }
+}
+
+
+    /* --- 畫廊容器 --- */
+    .gallery-container { 
+        display: flex; 
+        flex-wrap: wrap; 
+        justify-content: center; 
+        align-items: flex-start; 
+        padding: 80px 20px; 
+        gap: 20px;
+        max-width: 1600px; 
+        margin: 0 auto;
+    }
+
+    /* --- 畫框核心結構 --- */
+.gallery-item { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; /* 確保繩子、畫框、標籤全都對齊中線 */
+    flex-shrink: 0; 
+   
+    
+    
+}
+/* 只有滑鼠移入 item 時，才讓裡面的 flip-card 搖擺 */
+.gallery-item:hover .flip-card { 
+    animation: swing 2s ease-in-out infinite; 
+}
+
+
+
+/* B. 點擊瞬間的物理回饋 (像按鈕被按下去) */
+.flip-card:active {
+    transform: scale(0.97) rotate(var(--rot)) !important;
+    transition: transform 0.1s ease;
+    will-change: transform, opacity;
+}
+
+/* --- 打字機核心動畫 --- */
+.typewriter-effect {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    /* 初始狀態就有邊框，但顏色透明 */
+    border-right: 3px solid transparent; 
+    width: 0;
+}
+
+/* 當彈窗啟動時觸發 */
+.modal-overlay.active .typewriter-effect {
+    animation: 
+        typing 1.5s steps(15, end) forwards 0.3s, 
+        /* 將 infinite 改為 5 次，閃爍完自動停止 */
+        blink-caret 0.75s step-end 4; 
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+/* 閃爍動畫：最後一幀回到透明 */
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: #7d5e53; }
+}
+
+/* 移除原本影響動畫的 !important，改用更穩定的過渡寫法 */
+.modal-overlay .modal-body p,
+.modal-overlay .modal-body div,
+.modal-overlay .modal-body ul li {
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+/* 只有在 active 狀態下才顯示 */
+.modal-overlay.active .modal-body p,
+.modal-overlay.active .modal-body div,
+.modal-overlay.active .modal-body ul li {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 階梯延遲：讓內容在打字快結束時開始浮現 */
+.modal-overlay.active .modal-body p:nth-of-type(2) { transition-delay: 1.6s; }
+.modal-overlay.active .modal-body p:nth-of-type(3) { transition-delay: 1.8s; }
+.modal-overlay.active .modal-body .skill-grid { transition-delay: 2.0s; } /* 假設妳有加 class */
+.modal-overlay.active .modal-body p:nth-of-type(4) { transition-delay: 2.2s; }
+
+
+/* --- C. About Me 內容出現的動畫 (優化版) --- */
+
+/* 1. 初始隱藏：使用 visibility 防止偷跑，增加位移距離感 */
+.modal-overlay .modal-body p,
+.modal-overlay .modal-body div,
+.modal-overlay .modal-body ul li {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out, visibility 0.6s;
+    will-change: opacity, transform; /* 告訴瀏覽器這幾個屬性會變動 */
+}
+
+/* 2. 啟動狀態 */
+.modal-overlay.active .modal-body p,
+.modal-overlay.active .modal-body div,
+.modal-overlay.active .modal-body ul li {
+    opacity: 1 !important;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* 3. 階梯延遲：改用 nth-of-type，確保每個區塊都能排隊 */
+.modal-overlay.active .modal-body p:nth-of-type(1) { transition-delay: 0.2s; } /* Dolores */
+.modal-overlay.active .modal-body p:nth-of-type(2) { transition-delay: 0.4s; } /* Senior 2D... */
+.modal-overlay.active .modal-body p:nth-of-type(3) { transition-delay: 0.6s; } /* 13+年經驗 */
+.modal-overlay.active .modal-body div:nth-of-type(1) { transition-delay: 0.8s; } /* 技能網格 */
+.modal-overlay.active .modal-body p:nth-of-type(4) { transition-delay: 1.0s; } /* 全方位實務... */
+
+/* 列表項目的階梯感 */
+.modal-overlay.active .modal-body ul li:nth-child(1) { transition-delay: 1.1s; }
+.modal-overlay.active .modal-body ul li:nth-child(2) { transition-delay: 1.2s; }
+.modal-overlay.active .modal-body ul li:nth-child(3) { transition-delay: 1.3s; }
+.modal-overlay.active .modal-body ul li:nth-child(4) { transition-delay: 1.4s; }
+
+/* 最後的按鈕與分割線 */
+.modal-overlay.active .modal-inner h2 { transition: all 0.5s ease 0.1s; }
+.modal-overlay.active .contact-cta { 
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.6s; 
+}
+
+/* 走進畫中時，強制隱藏影子層 */
+.flip-card.entering::after {
+    opacity: 0 !important;
+    transition: opacity 0.3s ease;
+}
+
+/* 修改：讓畫框原位後退、變淡 */
+.flip-card.entering {
+    animation: none !important;
+    transform-origin: center center !important; /* 確保從正中心擴張 */
+    pointer-events: none;
+    z-index: 10000;
+}
+
+/* 修正搖擺動畫：以畫框頂部為中心 */
+@keyframes swing { 
+    0%, 100% { transform: rotate(var(--rot)); } 
+    50% { transform: rotate(calc(var(--rot) + 2deg)); } 
+}
+    @keyframes swing-extreme-ani { 0%, 100% { transform: rotate(calc(var(--rot) - 5deg)) scale(1.05); } 50% { transform: rotate(calc(var(--rot) + 8deg)) scale(1.05); } }
+
+    .line { 
+    width: 1.5px; 
+    height: 60px; 
+    background-color: #8c7b75; 
+    position: absolute; /* 改為絕對定位 */
+    top: -60px;        /* 往上推到畫框上方 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10; 
+}
+    .line::before { 
+        content: ''; position: absolute; top: -4px; left: 50%; 
+        transform: translateX(-50%); width: 8px; height: 8px; 
+        background-color: #5d4037; border-radius: 50%; 
+        box-shadow: 1px 1px 2px rgba(0,0,0,0.3); 
+    }
+
+    /* --- 3D 翻牌效果 --- */
+.flip-card { 
+    perspective: 1000px; 
+    cursor: pointer; 
+    width: var(--card-w); 
+    height: var(--card-h);
+    transform: rotate(var(--rot)); 
+    transform-origin: center -60px; 
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: none !important;
+    z-index: 5; /* 提升層級 */
+    will-change: transform, opacity;
+}
+    .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d;
+    -webkit-font-smoothing: antialiased; /* 讓文字邊緣平滑 */
+    backface-visibility: hidden; }
+    .flip-card.is-flipped .flip-card-inner { transform: rotateY(180deg); }
+
+/* 2. 建立一個獨立的「假陰影」層 */
+.flip-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.02), 8px 8px 15px rgba(0,0,0,0.2);
+    border-radius: 3px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.8;
+    transform: translate(6px, 6px) scaleX(1);
+}
+
+/* 翻過去的動畫 */
+@keyframes shadow-flip-to-back {
+    0% { transform: translate(6px, 6px) scaleX(1); }
+    50% { transform: translate(0px, 6px) scaleX(0.15); }
+    100% { transform: translate(4px, 6px) scaleX(1); }
+}
+
+/* 翻回來的動畫 */
+@keyframes shadow-flip-to-front {
+    0% { transform: translate(4px, 6px) scaleX(1); }
+    50% { transform: translate(0px, 6px) scaleX(0.15); }
+    100% { transform: translate(6px, 6px) scaleX(1); }
+}
+
+/* 3. 專屬陰影的搖擺動畫 (不跟著翻轉，只跟著位移) */
+@keyframes shadow-only-swing {
+    0%, 100% { transform: translate(6px, 6px); opacity: 0.8; }
+    50% { transform: translate(12px, 12px); opacity: 0.5; } 
+}
+
+/* 當滑鼠移入 item 時，畫框晃動，影子也跟著「獨立」晃動 */
+.gallery-item:hover .flip-card:not(.is-flipped):not(.flipping-back)::after {
+    animation: shadow-only-swing 2s ease-in-out infinite;
+}
+
+/* 只有在翻轉狀態下才執行影子動畫 */
+.flip-card.is-flipped::after {
+    animation: shadow-flip-to-back 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0.6;
+}
+
+.flip-card.flipping-back::after {
+    animation: shadow-flip-to-front 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* 如果你還是想要滑鼠移入時有「微晃感」，建議只針對本體畫框做 swing */
+.gallery-item:hover .flip-card {
+    animation: swing 2s ease-in-out infinite;
+}
+/* 不要對影子做單獨的 shadow-only-swing，這樣點擊翻轉時才不會衝突 */
+
+
+    /* --- 懸浮標牌標題 (恢復滿意版本) --- */
+.item-title {
+    position: relative; 
+    margin-top: 25px;   
+    background-color: #ffffff; /* 改為純白更像銘牌 */
+    padding: 6px 30px;         /* 增加左右內距給釘子留空間 */
+    border: 1px solid #dcdcdc;
+    font-size: 16px;    
+    font-weight: 600;
+    color: #5d4037;
+    white-space: nowrap;
+    letter-spacing: 0.1em;
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.05); /* 輕微投影 */
+    z-index: 5;
+    display: inline-block;
+}
+/* 左側釘子 */
+.item-title::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10px;               /* 釘子位置 */
+    transform: translateY(-50%);
+    width: 6px;               /* 釘子大小 */
+    height: 6px;
+    background-color: #8c7b75; /* 釘子顏色，與掛繩一致 */
+    border-radius: 50%;
+    box-shadow: inset 1px 1px 1px rgba(0,0,0,0.3); /* 增加凹陷立體感 */
+}
+/* 右側釘子 */
+.item-title::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 10px;              /* 釘子位置 */
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    background-color: #8c7b75;
+    border-radius: 50%;
+    box-shadow: inset 1px 1px 1px rgba(0,0,0,0.3);
+}
+
+/* --- 畫框邊框對作品紙張的投影 --- */
+.frame { 
+    background-color: #fff; 
+    padding: 12px 12px 35px; 
+    border: 10px solid #2c2421; 
+    /* 修改這裡：增加一個 inset 陰影 */
+    /* 第一組是原本對牆面的投影，第二組是框對紙的內投影 */
+    box-shadow: 
+        8px 12px 20px rgba(0,0,0,0.1), 
+        inset 0 0 3px rgba(104, 104, 104, 0.8); 
+    
+    position: absolute; 
+    top:0; left:0; 
+    width: 100%; 
+    height: 100%;
+    backface-visibility: hidden; 
+    -webkit-backface-visibility: hidden; 
+    box-sizing: border-box; 
+    display: flex;
+    flex-direction: column;
+}
+    /* 核心修改：讓 image-box 產生被邊框「壓住」的陰影感 */
+.image-box { 
+    background: #eee; 
+    overflow: hidden; 
+    width: 100%; 
+    height: 100%; 
+    position: relative;
+    /* 建立獨立層級 */
+    transform: translateZ(0); 
+    box-shadow: 0 0 5px rgba(0,0,0,0.1); 
+}
+
+
+
+.image-box img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    display: block;
+    position: relative;
+    z-index: 1; /* 圖片放在最底層 */
+}
+    
+    /* 1. 確保背面在翻轉後擁有優先判定權 */
+.flip-back { 
+    transform: rotateY(180deg) translateZ(1px); /* 增加 1px 的 Z 軸高度，確保它在最前面 */
+    background-color: #fff9f5; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    backface-visibility: hidden;
+}
+
+
+
+    /* --- 背面內容 --- */
+    .back-content { 
+    text-align: center; 
+    padding: 15px 15px 60px; /* 增加底部內距 (60px)，確保文字不被按鈕蓋住 */
+    width: 100%; 
+    box-sizing: border-box; /* 確保 padding 不會撐破容器 */
+}
+    .back-content h3 { 
+    color: #5d4037; 
+    font-size: 1.4rem; /* 原本 1rem -> 改為 1.2rem，讓標題更醒目 */
+    margin-bottom: 12px; 
+}
+    .back-content p { 
+    color: #666; /* 顏色稍微深一點，提升閱讀對比度 */
+    font-size: 0.95rem; /* 原本 0.75rem -> 改為 0.95rem，這是中文閱讀較舒適的大小 */
+    margin-bottom: 15px; 
+    line-height: 1.6; /* 增加行高，避免文字擠在一起 */
+    padding: 0 10px; 
+}
+
+/* 新的按鈕樣式：獨立於翻轉容器之外 */
+.enter-btn-fixed {
+    position: absolute;
+    bottom: 30px; /* 對準背面 content 的位置 */
+    left: 50%;
+    transform: translateX(-50%) translateZ(10px); /* 確保在 3D 最上層 */
+    background-color: #5d4037;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    z-index: 9999;
+    
+    /* 關鍵：初始隱藏，只有翻面後才讓它可點擊 */
+    opacity: 0;
+    pointer-events: none;
+
+    transition: all 0.3s ease;/* 重點：讓所有屬性過渡耗時 0.3s，但「延遲」0.4s 才開始執行 */
+    transition-delay: 0s; /* 預設回正面時不延遲，立即消失 */
+}
+
+/* 當父層 .flip-card 帶有 .is-flipped 時，顯示按鈕 */
+.flip-card.is-flipped .enter-btn-fixed {
+    opacity: 1;
+    pointer-events: auto;
+    /* 關鍵：翻過來的時候晚 0.4 秒出現 */
+    transition-delay: 0.2s;
+}
+
+
+    /* 2. 讓按鈕絕對可以被點到 */
+.enter-btn { 
+    position: relative;
+    z-index: 999; /* 內部最高層級 */
+    background-color: #5d4037; 
+    color: white; 
+    border: none; 
+    padding: 8px 18px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-size: 0.9rem;
+    pointer-events: auto !important; /* 強制接收點擊 */
+}
+
+    /* --- 尺寸與色彩個性定義 --- */
+    .item-1 { --rot: -4deg; --card-w: 270px; --card-h: 240px; } .item-1 .frame { border-color: #2c2421; }
+    .item-2 { --rot: 3deg;  --card-w: 222px; --card-h: 245px; } .item-2 .frame { border-color: #8d7065; }
+    .item-3 { --rot: -1deg; --card-w: 292px; --card-h: 412px; } .item-3 .frame { border-color: #2c2421; border-width: 14px; }
+    .item-4 { --rot: 4deg;  --card-w: 305px; --card-h: 245px; } .item-4 .frame { border-color: #b7a39a; }
+    .item-5 { --rot: -2deg; --card-w: 265px; --card-h: 285px; } .item-5 .frame { border-color: #2c2421; }
+    .item-6 { --rot: 2deg;  --card-w: 256px; --card-h: 319px; } .item-6 .frame { border-color: #5d4037; }
+    .item-7 { --rot: -3deg; --card-w: 336px; --card-h: 231px; } .item-7 .frame { border-color: #a68b7c; border-width: 8px; }
+    .item-8 { --rot: 1.5deg;--card-w: 267px; --card-h: 267px; } .item-8 .frame { border-color: #2c2421; }
+    .item-9 { --rot: -5deg; --card-w: 309px; --card-h: 225px; } .item-9 .frame { border-color: #3e2723; }
+    .item-10 { --rot: 3.5deg;--card-w: 250px; --card-h: 302px; } .item-10 .frame { border-color: #2c2421; border-width: 12px; }
+
+    /* --- 電腦版 5 欄排版修正 --- */
+    @media (min-width: 1025px) {
+        .gallery-container { padding: 80px 20px; row-gap: 120px; column-gap: 20px; }
+        .item-1, .item-6 { margin-top: 40px; }
+        .item-2, .item-7 { margin-top: 100px; }
+        .item-3, .item-8 { margin-top: 0px; }
+        .item-4, .item-9 { margin-top: 60px; }
+        .item-5, .item-10 { margin-top: 30px; }
+    }
+
+    @media (min-width: 1800px) {
+        .gallery-container { max-width: 1500px; } /* 修正大螢幕寬度，確保塞下 5 個 */
+    }
+
+    /* 手機版 RWD 優化 */
+    @media (max-width: 768px) {
+        .back-content { padding: 8px; }
+    .back-content h3 { font-size: 1.1rem; }
+    .back-content p { font-size: 0.85rem; }
+        .header-container { flex-direction: column; text-align: center; }
+        .header-text { text-align: center; padding: 0 20px; }
+        .gallery-container { 
+        gap: 80px; /* 增加上下項目的間距，給擺動留空間 */
+        padding: 60px 20px; 
+    }
+        .gallery-item { margin-top: 0 !important; }
+        .flip-card { 
+        width: 75vw !important; 
+        max-width: 300px !important; 
+        height: auto !important; 
+        aspect-ratio: var(--ratio, 1/1);
+        transform-origin: center -35px; /* 改為手機版的繩子長度 */
+    }
+        .item-title {
+        font-size: 15px;
+        margin-top: 15px; 
+        padding: 4px 20px;
+        bottom: auto; /* 確保重置原本的絕對定位 */
+    }
+        .item-1 { --ratio: 220/160; } .item-3 { --ratio: 240/340; } .item-4 { --ratio: 260/180; }
+        .item-6 { --ratio: 200/260; } .item-7 { --ratio: 280/180; } .item-9 { --ratio: 250/170; } .item-10 { --ratio: 190/240; }
+        .line { 
+        height: 35px; 
+        top: -35px; 
+    }
+    }
+</style>
+</head>
+<body>
+
+<header class="header">
+<div class="header-container">
+    <div class="profile-layout"> <div class="profile-container">
+            <div class="profile-arc"></div>
+            <img src="Head_02.webp" alt="Dolores" class="profile-img">
+        </div>
+        <button class="about-me-btn" onclick="openAboutModal()">ABOUT ME</button>
+    </div>
+    
+    <div class="header-text">
+        
+        <h1>DOLORES</h1>
+        <div class="subtitle">資深 2D 美術 | 13 年遊戲開發經驗 | 遊戲製程開發</div>
+        <p class="description">深耕產業多年，具備專案從視覺風格發想到素材進引擎（Unity或Cocos）調整、上線的完整實務經驗</p>
+    </div>
+</div>
+</header>
+
+<main class="gallery-container">
+    <script>
+        const works = [
+            { id: 1, title: '前端美術界面整合', bT: '前端美術整合', d: '負責各美術物件導入引擎、建立分頁prefab檔、檢查引擎美術資源優化。', s: 'Unity / Cocos / CSS' },
+            { id: 2, title: '角色&場物設計', bT: '視覺形象開發', d: '各風格角色設計與場景物件設定', s: 'Photoshop / SAI' },
+            { id: 3, title: '專案規劃(主美術)', bT: '主美術管理', d: '帶領美術團隊，控管專案視覺品質與時程。', s: 'Management / Design' },
+            { id: 4, title: 'SPINE相關', bT: '2D 骨架動畫', d: '人物動態、Icon動畫、角色戰鬥動作與過場演出。', s: 'Spine 2D / Animation' },
+            { id: 5, title: '粒子動態等', bT: '特效資源管理', d: '粒子系統優化與各類環境特效製作。', s: 'Unity Particle / FX' },
+            { id: 6, title: 'UI設計', bT: '專案UI及按鈕設計', d: '依據專案風格創作繪製UI及按鈕。', s: 'Photoshop / SAI' },
+            { id: 7, title: '其他創作', bT: '同人作品相關', d: '私下繪製或私人接案的同人作品。', s: 'Photoshop / SAI' },
+            { id: 8, title: '自製小遊戲網站', bT: '自製家族旅遊回憶網頁', d: '與AI搭配嘗試製作網頁&小遊戲。', s: 'AI / html / css / python' },
+            { id: 9, title: 'AI製作各類工具', bT: 'AI 工作流優化', d: '開發 AI 輔助小工具以優化美術生產與工作流程。', s: 'AI / html / css / python' }
+            
+        ];
+
+document.write(works.map(w => `
+    <div class="gallery-item item-${w.id}">
+        <div class="flip-card">
+            <div class="line"></div>
+            <div class="flip-card-inner">
+                <div class="frame flip-front">
+                    <div class="image-box"><img src="assets/img/thumb/p${w.id}_00.webp" alt="${w.title}"></div>
+                </div>
+                <div class="frame flip-back">
+                    <div class="back-content">
+                        <h3>${w.bT}</h3>
+                        <p>${w.d}</p>
+                        <small style="color:#b7a39a; font-weight:bold;">${w.s}</small>
+                        </div>
+                </div>
+            </div>
+            <button class="enter-btn-fixed" data-id="${w.id}">ENTER</button>
+        </div>
+        <div class="item-title">${w.title}</div> 
+    </div>
+`).join(''));
+
+
+
+
+
+    </script>
+</main>
+
+<script>
+const modal = document.getElementById('aboutModal');
+
+// --- 彈窗邏輯 ---
+function openAboutModal() {
+    const modalElement = document.getElementById('aboutModal');
+    if (modalElement) {
+        const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+        document.body.style.paddingRight = scrollBarWidth + 'px';
+        document.body.style.overflow = 'hidden';
+        
+        // 保險做法：先顯示遮罩，延遲 10ms 再啟動內部動畫類別
+        modalElement.style.display = 'flex'; 
+        setTimeout(() => {
+            modalElement.classList.add('active');
+        }, 10);
+    }
+}
+
+function closeAboutModal() {
+    const modalElement = document.getElementById('aboutModal');
+    if (modalElement) {
+        modalElement.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        document.body.style.paddingRight = '0px';
+    }
+}
+
+// 點擊遮罩區域也可關閉
+window.addEventListener('click', function(event) {
+    const modalElement = document.getElementById('aboutModal');
+    if (event.target === modalElement) closeAboutModal();
+});
+
+// --- 核心修正：改用「事件委託」處理動態產生的畫框 ---
+document.addEventListener('click', function(e) {
+// 處理 ENTER 按鈕點擊：實裝「走進畫中」效果
+// 尋找 document.addEventListener('click', function(e) { ... } 內的 enter-btn-fixed 邏輯
+if (e.target.classList.contains('enter-btn-fixed')) {
+
+    e.stopPropagation();
+
+    const wId = e.target.getAttribute('data-id');
+    const card = e.target.closest('.flip-card');
+
+       document.body.style.pointerEvents = "none";
+    card.classList.add('entering');
+
+    // --- 核心優化設定 ---
+    // 讓 transform 持續 0.8s，但 opacity 在 0.4s 內就消失 (造成消逝感)
+
+card.style.transition = "transform 3s ease-out, " +
+                        "opacity 2s ease-out, " +
+                        "filter 0.2s ease-out";
+
+    // 執行動作：稍微放大 (1.5倍) + 快速變透明
+    card.style.transform = "rotateY(180deg) scale(1.4) scaleX(-1)";
+    card.style.filter = "blur(10px)"; // 稍微加深模糊，遮蓋鋸齒
+    card.style.opacity = "0";
+
+    // 同步讓背景（牆面）霧化
+    setTimeout(() => {
+
+        // 讓牆面更有「藝廊白」的過渡感
+        document.body.style.transition = "all 0.6s ease-in-out";
+        document.body.style.backgroundColor = "#ffffff"; // 往純白過渡
+        document.body.style.filter = "blur(10px)";
+        document.body.style.opacity = "0";
+
+
+
+        setTimeout(() => {
+            window.location.href = `projects/project-${wId}.html`;
+        }, 300);
+    }, 50);
+    return;
+
+}
+
+// 2. 處理畫框翻轉
+const flipCard = e.target.closest('.flip-card');
+if (flipCard) {
+    if (!flipCard.classList.contains('is-flipped')) {
+        flipCard.classList.remove('flipping-back');
+        void flipCard.offsetWidth; // 關鍵：觸發 reflow 讓瀏覽器重新偵測動畫啟動
+        flipCard.classList.add('is-flipped');
+    } else {
+        flipCard.classList.remove('is-flipped');
+        void flipCard.offsetWidth; // 觸發 reflow
+        flipCard.classList.add('flipping-back');
+        
+        setTimeout(() => {
+            flipCard.classList.remove('flipping-back');
+        }, 600);
+    }
+}
+});
+</script>
+
+<div class="modal-overlay" id="aboutModal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeAboutModal()">&times;</span>
+        <div class="modal-inner">
+            <h2 style="margin-top: 0;">ABOUT ME</h2>
+<div class="modal-body">
+    <p style="margin-bottom: 5px;">
+        <span class="typewriter-effect" style="color: #fff; font-size: 1.3rem; letter-spacing: 0.1em; font-weight: bold;">Dolores</span>
+    </p>
+    <p style="color: #a68b7c; font-weight: bold; margin-top: 0; font-size: 0.9rem;">
+        Senior 2D Artist / Lead Artist <br>
+        <span style="color: #7d5e53; font-size: 0.8rem; font-weight: normal;">Logic-Driven Creativity & Pipeline Optimization</span>
+    </p>
+    
+    <p style="margin-top: 25px; border-left: 3px solid #7d5e53; padding-left: 15px;">
+        <strong>13+ 年遊戲產業經驗</strong><br>
+        曾任職於 <strong>X-LEGEND 傳奇網路 (6年)</strong> 與 <strong>DaYuan Software (7年)</strong>。參與過多款已上線之手遊、網遊專案開發，熟悉從零到專案完成的視覺建構與製程優化。
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+        <div>
+            <small style="color: #7d5e53; font-weight: bold; display: block; margin-bottom: 8px;">ART & ANIMATION</small>
+            <ul style="margin: 0; padding-left: 18px; color: #bcaaa4; font-size: 0.85rem; line-height: 1.6;">
+                <li>2D 視覺風格定調 / 角色設定</li>
+                <li>UI 介面設計 / 排版、裁切</li>
+                <li>Spine 2D 骨架動畫 / 過場演出</li>
+                <li>引擎內簡易粒子 / 過場演出</li>
+            </ul>
+        </div>
+        <div>
+            <small style="color: #7d5e53; font-weight: bold; display: block; margin-bottom: 8px;">TECHNICAL & FLOW</small>
+            <ul style="margin: 0; padding-left: 18px; color: #bcaaa4; font-size: 0.85rem; line-height: 1.6;">
+                <li>Unity / Cocos 引擎美術整合</li>
+               
+                <li>Python 流程自動化 / AI 使用</li>
+            </ul>
+        </div>
+    </div>
+
+    <p style="margin-top: 25px; font-size: 0.9rem;">
+        具備多款遊戲製作經驗：從視覺風格發想、草圖完稿、UI 排版設計到 Spine 動態演出、粒子表演；並能獨立完成素材命名統整、裁切優化，直至導入 <strong>Unity/Cocos 引擎</strong> 與前端對接。
+    </p>
+
+<div style="margin: 30px 0; text-align: center; opacity: 0.3;">
+    <span style="color: #7d5e53; letter-spacing: 5px;">————— ✠ —————</span>
+</div>
+
+<div style="margin-top: 40px; border-top: 1px solid #4a3b35; padding-top: 30px; text-align: center;">
+    <a href="mailto:dolores0715@gmail.com" class="contact-cta">
+        <span style="font-size: 0.75rem; opacity: 0.8; display: block; margin-bottom: 6px; letter-spacing: 2px;">歡迎合作、委託來信</span>
+        <span style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            dolores0715@gmail.com
+        </span>
+    </a>
+
+    <p style="color: #6d5d57; font-size: 0.78rem; margin-top: 25px; line-height: 1.6; letter-spacing: 0.05em;">
+        遊戲美術委託 / 遠端長期合作<br>
+    
+        
+    </p>
+</div>
+</div>
+        </div>
+    </div>
+</div>
+
+<div class="ambient-particles"></div>
+
+
+
+</body>
+</html>
