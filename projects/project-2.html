@@ -54,8 +54,8 @@ body {
 /* --- 導覽按鈕設計 --- */
 .nav-arrow-btn {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: column; /* 確保內容垂直堆疊 */
+    align-items: center;    /* 確保三角形與文字中線對齊 */
     text-decoration: none;
     transition: all 0.3s ease;
     min-width: 80px;
@@ -65,16 +65,16 @@ body {
     font-size: 11px;
     font-weight: bold;
     color: #b7a39a;
-    margin-top: 8px;
+    margin-top: 8px; /* 統一與上方箭頭的間距 */
     letter-spacing: 0.1em;
-    transition: color 0.3s;
+    order: 2; /* 強制文字排在第二順位 */
 }
-
 /* 繪製咖啡色三角形箭頭 */
 .arrow-icon {
     width: 0;
     height: 0;
     border-style: solid;
+    order: 1; /* 強制箭頭排在第一順位 */
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 /* 左箭頭 */
