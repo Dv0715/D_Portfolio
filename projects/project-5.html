@@ -208,6 +208,43 @@ body {
     opacity: 1;
     transform: translateY(0);
 }
+/* --- 燈箱 (Lightbox) 基礎樣式 --- */
+.lightbox {
+    display: none;
+    position: fixed;
+    z-index: 2000; /* 高於所有導覽與返回按鈕 */
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(44, 36, 33, 0.95); /* 使用妳的主色調深褐色 */
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-out;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.3s ease;
+}
+
+.lightbox.active {
+    display: flex;
+}
+
+.lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    border: 5px solid #fff;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.lightbox.active img {
+    transform: scale(1);
+}
+
+/* 讓可點擊的圖片顯示放大鏡圖標 */
+.full-image-frame img, .split-item img {
+    cursor: zoom-in;
+}
+
 
 /* --- 圖像懸停互動 --- */
 .detail-image {
@@ -647,6 +684,9 @@ body {
 </div>
 </main>
 <script>
+
+
+
     const observerOptions = {
         threshold: 0.1 // 稍微調低門檻，確保圖片一進入視窗就顯示
     };
@@ -665,6 +705,42 @@ body {
     allBlocks.forEach(block => {
         observer.observe(block);
     });
+window.addEventListener('load', () => {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const container = document.querySelector('.container');
+
+    if (container) {
+        container.addEventListener('click', (e) => {
+            // 檢查點擊的是否為 IMG 標籤
+            if (e.target.tagName === 'IMG') {
+                // 檢查它是否在我們允許放大的畫框內
+                const frame = e.target.closest('.full-image-frame') || e.target.closest('.split-item');
+                if (frame) {
+                    openLightbox(e.target.src);
+                }
+            }
+        });
+    }
+
+    function openLightbox(src) {
+        lightboxImg.src = src;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden'; 
+    }
+});
+
+// 關閉邏輯要放在外面（因為 HTML 裡的 onclick="closeLightbox()" 會去全域找這個 function）
+function closeLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    lightbox.classList.remove('active');
+    document.body.style.overflow = 'auto'; 
+    setTimeout(() => { lightboxImg.src = ''; }, 300); 
+}
 </script>
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="放大檢視">
+</div>
 </body>
 </html>
