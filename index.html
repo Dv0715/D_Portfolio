@@ -838,11 +838,76 @@ body::before {
         top: -35px; 
     }
     }
+
+/* --- Debug Mode 樣式集 --- */
+/* 畫框變綠色虛線選框 */
+body.debug-mode .frame {
+    /* 使用亮綠色但降低邊框透明度 */
+    border: 2px dashed rgba(0, 255, 102, 0.7) !important;
+    background: rgba(0, 255, 102, 0.03) !important; /* 極淡的綠色底，增加「選中」感 */
+}
+
+/* 顯示模擬的引擎數據 */
+body.debug-mode .image-box::after {
+    /* 內容保持不變 */
+    content: "● SIMULATED SPEC | TEX: 512px | DC: 1 | Tris: 124";
+    
+    /* 核心色調修改 */
+    background: rgba(20, 20, 20, 0.85); /* 深灰近黑，85% 透明度更有層次感 */
+    color: #00ff66;                    /* 改用稍微偏青的綠，比純綠更具科技感 */
+    border: 1px solid rgba(0, 255, 102, 0.5); /* 增加一個半透明的小邊框，像 HUD 介面 */
+    
+    /* 字體與間距微調 */
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    
+    /* 確保位置在左下角且不被遮擋 */
+    position: absolute;
+    bottom: 8px; 
+    left: 8px;
+    z-index: 100;
+    
+    /* 增加一個微妙的發光感 */
+    text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+    pointer-events: none; /* 讓滑鼠點擊可以穿透標籤，不干擾卡片翻轉 */
+}
+
+/* 顯示座標軸 Gizmos */
+body.debug-mode .gallery-item::before {
+    content: "";
+    position: absolute;
+    top: -30px; left: 50%;
+    width: 2px; height: 30px;
+    background: linear-gradient(to bottom, #ff0000, #0000ff);
+    z-index: 20;
+}
+
+/* Debug Mode 開關的專屬樣式 */
+.debug-toggle-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 200;
+}
+
+.debug-label {
+    font-size: 0.7rem;
+    color: #888;
+    margin-right: 8px;
+    letter-spacing: 1px;
+}
+
 </style>
 </head>
 <body>
 
 <header class="header">
+    <div class="debug-toggle-container">
+        <span class="debug-label">[ Dev View ]</span>
+        <input type="checkbox" id="debugToggle" onclick="toggleDebugMode()">
+    </div>
 <div class="header-container">
     <div class="profile-layout"> <div class="profile-container">
             <div class="profile-arc"></div>
@@ -862,6 +927,9 @@ body::before {
 
 <main class="gallery-container">
     <script>
+
+
+
         const works = [
             { id: 1, title: '前端美術界面整合', bT: '前端美術整合', d: '負責各美術物件導入引擎、建立分頁prefab檔、檢查引擎美術資源優化。', s: 'Unity / Cocos / CSS' },
             { id: 2, title: '角色&場物設計', bT: '視覺形象開發', d: '各風格角色設計與場景物件設定', s: 'Photoshop / SAI' },
@@ -897,6 +965,9 @@ document.write(works.map(w => `
     </div>
 `).join(''));
 
+
+
+
 // 手機陀螺儀互動：讓畫框隨重力微晃
 if (window.DeviceOrientationEvent) {
     window.addEventListener('deviceorientation', (event) => {
@@ -917,6 +988,16 @@ if (window.DeviceOrientationEvent) {
 </main>
 
 <script>
+
+function toggleDebugMode() {
+    const isChecked = document.getElementById('debugToggle').checked;
+    if (isChecked) {
+        document.body.classList.add('debug-mode');
+    } else {
+        document.body.classList.remove('debug-mode');
+    }
+}
+
 const modal = document.getElementById('aboutModal');
 
 // --- 彈窗邏輯 ---
