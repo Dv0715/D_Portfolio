@@ -61,6 +61,14 @@ body {
     min-width: 80px;
 }
 
+/* 針對第一頁的特殊處理 */
+.nav-arrow-btn.next {
+    opacity: 0.2;            /* 降低透明度，使其看起來像灰色/禁用 */
+    pointer-events: none;    /* 核心：禁止滑鼠點擊與觸發連結 */
+    cursor: default;         /* 滑鼠移上去不會變成小手 */
+    filter: grayscale(100%); /* (選配) 變灰色，完全降低存在感 */
+}
+
 .nav-hint {
     font-size: 11px;
     font-weight: bold;

@@ -70,6 +70,13 @@ body {
     order: 2; /* 強制文字排在第二順位 */
 }
 
+/* 針對第一頁的特殊處理 */
+.nav-arrow-btn.prev {
+    opacity: 0.2;            /* 降低透明度，使其看起來像灰色/禁用 */
+    pointer-events: none;    /* 核心：禁止滑鼠點擊與觸發連結 */
+    cursor: default;         /* 滑鼠移上去不會變成小手 */
+    filter: grayscale(100%); /* (選配) 變灰色，完全降低存在感 */
+}
 
 /* 繪製咖啡色三角形箭頭 */
 .arrow-icon {
@@ -378,6 +385,7 @@ body {
     font-weight: 600;
     line-height: 0.6;
     margin-top: 12px; /* 與上方圖片拉開距離 */
+    margin-bottom: 8px; /* 增加段落間的距離，避免看起來太擠 */
     text-align: left;
     display: block; /* 確保它是獨立一行 */
 }
@@ -568,7 +576,7 @@ body {
     <div class="full-image-frame">
         <img src="../assets/gallery/p1_02.webp" alt="Unity內動畫檔製作">
         
-        <p class="inner-caption">．若缺少動畫檔，直接於Unity內製作補上</p>
+        <p class="inner-caption">．若缺少動畫檔，直接於引擎內製作補上</p>
     </div>
 </section>
 
@@ -580,7 +588,7 @@ body {
     <div class="full-image-frame">
         <img src="../assets/gallery/p1_03.webp" alt="Unity內動畫檔製作">
         
-        <p class="inner-caption">．若缺少粒子，直接於Unity內製作補上(簡易版)</p>
+        <p class="inner-caption">．若缺少粒子，直接於引擎內製作補上(簡易版)</p>
     </div>
 </section>
 
@@ -619,14 +627,18 @@ body {
     </div>
 
     <div class="full-image-frame">
-        <img src="../assets/gallery/p1_06.webp" alt="Unity內切圖排版">
+        <img src="../assets/gallery/p1_06.webp" alt="前端美術界面整合">
         
-        <p class="inner-caption">臨時缺少線段動態，嘗試查詢教學及利用AI試做簡易Shader補上</p>
+        <p class="inner-caption">．嘗試在Cocos內做基礎Shader試作</p>
+        <p class="inner-caption">．簡易流光、邊緣光暈與動態Mask遮罩控制</p>
+        <p class="inner-caption">．建立LineAnimator腳本，實現線段自動化渲染</p>
+        <p class="inner-caption">．建立線段Prefab，確定位置</p>
+
     </div>
 </section>
 <div class="bottom-nav-container">
     <div class="footer-line"></div> <div class="bottom-nav-btns">
-        <a href="../projects/project-8.html" class="nav-arrow-btn prev">
+        <a href="../projects/project-9.html" class="nav-arrow-btn prev">
             <div class="arrow-icon"></div>
             <span class="nav-hint">PREV</span>
         </a>
