@@ -36,6 +36,23 @@ body::before {
     background-color: #fff; 
 }
     
+@keyframes glow-pulse {
+    0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2)); }
+    50% { filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6)); }
+}
+
+/* 2. 當卡片翻面 (is-flipped) 且滑鼠靠近按鈕時，讓整個畫框發光 */
+/* 我們直接偵測 flip-card，這樣無論滑鼠在按鈕還是卡片背面上，都會有選取感 */
+.flip-card.is-flipped:hover .flip-back {
+    border-color: #7d5e53; /* 邊框微亮 */
+    box-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.4), 
+        inset 0 0 10px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+
+
 /* 新增按鈕專屬樣式 */
 .contact-cta {
     display: inline-block;
@@ -195,6 +212,9 @@ body::before {
     color: #bcaaa4; /* 柔和的文字色 */
     font-size: 0.95rem;
     line-height: 1.8;
+    text-align: justify; /* 左右對齊 */
+    text-justify: inter-character;
+    hyphens: auto;
 }
 
 /* 針對手機版 (max-width: 768px) 的文字優化 */
@@ -317,19 +337,35 @@ body::before {
         margin: 0 auto;
     }
 
+/* 增加一個滑鼠懸停在 ENTER 按鈕時，畫框發光的特效 */
+.enter-btn-fixed:hover {
+    background-color: #a68b7c;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    transform: translateX(-50%) translateY(-2px) scale(1.05);
+}
+
+
     /* --- 畫框核心結構 --- */
 .gallery-item { 
     display: flex; 
     flex-direction: column; 
     align-items: center; /* 確保繩子、畫框、標籤全都對齊中線 */
     flex-shrink: 0; 
-   
     
     
 }
 /* 只有滑鼠移入 item 時，才讓裡面的 flip-card 搖擺 */
 .gallery-item:hover .flip-card { 
     animation: swing 2s ease-in-out infinite; 
+}
+
+/* 當畫框被懸停時，下方的銘牌標題稍微變色並上浮 */
+.gallery-item:hover .item-title {
+    background-color: #7d5e53;
+    color: #fff;
+    border-color: #7d5e53;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
 }
 
 /* 定義待機的微小晃動 */
@@ -501,7 +537,12 @@ body::before {
     .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d;
     -webkit-font-smoothing: antialiased; /* 讓文字邊緣平滑 */
     backface-visibility: hidden; }
-    .flip-card.is-flipped .flip-card-inner { transform: rotateY(180deg); }
+    .flip-card.is-flipped .flip-card-inner { 
+        transform: rotateY(180deg); 
+        
+    }
+
+
 
 /* 2. 建立一個獨立的「假陰影」層 */
 .flip-card::after {
@@ -573,7 +614,12 @@ body::before {
     letter-spacing: 0.1em;
     box-shadow: 1px 1px 4px rgba(0,0,0,0.05); /* 輕微投影 */
     z-index: 5;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* 保持妳原本的銘牌樣式，但加入基準點 */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-origin: center top; /* 以頂部為軸心 */
 }
 /* 左側釘子 */
 .item-title::before {
@@ -851,7 +897,19 @@ document.write(works.map(w => `
     </div>
 `).join(''));
 
-
+// 手機陀螺儀互動：讓畫框隨重力微晃
+if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (event) => {
+        const tiltX = Math.round(event.gamma); // 左右傾斜
+        const cards = document.querySelectorAll('.flip-card');
+        
+        cards.forEach(card => {
+            // 限制最大傾斜角度，避免過度晃動
+            const offset = tiltX * 0.15; 
+            card.style.transform = `rotate(calc(var(--rot) + ${offset}deg))`;
+        });
+    });
+}
 
 
 
