@@ -632,6 +632,32 @@ function closeLightbox() {
     document.body.style.overflow = 'auto'; 
     setTimeout(() => { lightboxImg.src = ''; }, 300); 
 }
+/* --- 解決瀏覽器「上一頁」快取導致頁面消失的問題 --- */
+window.addEventListener('pageshow', function(event) {
+    // 如果是從快取（Cache）讀取頁面（即按了上一頁/下一頁）
+    if (event.persisted) {
+        // 1. 強制讓 body 恢復可見與可點擊
+        const b = document.body;
+        b.style.transition = "none";
+        b.style.opacity = "1";
+        b.style.filter = "none";
+        b.style.backgroundColor = "#f8f8f6"; // 恢復妳原本的牆面色
+        b.style.pointerEvents = "auto";
+
+        // 2. 找到所有正在「進入動畫」的畫框並重置
+        document.querySelectorAll('.flip-card').forEach(card => {
+            card.classList.remove('entering');
+            card.style.opacity = "1";
+            card.style.transform = ""; // 恢復 CSS 預設的旋轉值
+            card.style.filter = "none";
+        });
+        
+        // 3. 確保轉場動畫之後可以重新被觸發
+        console.log("Page restored from BFCache.");
+    }
+});
+
+
 </script>
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
     <img id="lightbox-img" src="" alt="放大檢視">
