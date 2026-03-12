@@ -4,887 +4,227 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dolores Portfolio</title>
-<style>
+    <style>
+/* ============================================================
+   TABLE OF CONTENTS
+   1. CSS Variables & Reset
+   2. Base / Body
+   3. Header
+   4. Gallery Layout
+   5. Gallery Item (Frame + Rope)
+   6. Flip Card
+   7. Frame & Image Box
+   8. Card Back Content
+   9. Name Plate (item-title)
+  10. Modal (About Me)
+  11. Animations
+  12. Debug Mode
+  13. Responsive (Mobile)
+  14. Dark Mode
+============================================================ */
 
-    /* --- 基礎樣式 --- */
-    body {
-    margin: 0; padding: 0;
-    /* 牆面質感：底色 + 淡淡的噴砂顆粒感 */
-    background-color: #f8f8f6;
-    background-image: 
+
+/* ─── 1. CSS Variables & Reset ─────────────────────────── */
+:root {
+    --color-bg:          #f8f8f6;
+    --color-dark:        #2c2421;
+    --color-brown:       #5d4037;
+    --color-brown-mid:   #7d5e53;
+    --color-brown-light: #a68b7c;
+    --color-rope:        #8c7b75;
+    --color-modal-bg:    #2c2421;
+    --color-text-muted:  #bcaaa4;
+    --transition-card:   transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+
+/* ─── 2. Base / Body ────────────────────────────────────── */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-bg);
+    background-image:
         radial-gradient(#e5e5e0 1px, transparent 0),
         radial-gradient(#e5e5e0 1px, transparent 0);
     background-size: 30px 30px;
     background-position: 0 0, 15px 15px;
     font-family: "PingFang TC", sans-serif;
     overflow-x: hidden;
-    scrollbar-gutter: stable; /* 即使沒有滾動條，也會預留空間，防止位移 */
+    scrollbar-gutter: stable;
+    transition: background-color 0.4s ease;
 }
 
-/* 增加一個環境光效果 */
+/* ① 滑鼠聚光燈層 */
+#spotlight {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    background: radial-gradient(
+        circle 380px at var(--mx, 50%) var(--my, 40%),
+        rgba(255, 248, 235, 0.18) 0%,
+        rgba(255, 245, 225, 0.06) 45%,
+        transparent 70%
+    );
+}
+
+/* ② 牆面打光：固定的多層漸層，模擬頂部聚光燈由上往下打 */
 body::before {
-    content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at 50% 30%, transparent 0%, rgba(0,0,0,0.02) 100%);
-    pointer-events: none; /* 重要：讓滑鼠點擊穿透 */
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        linear-gradient(to bottom,
+            rgba(0,0,0,0.06) 0%,
+            rgba(0,0,0,0)    18%,
+            rgba(0,0,0,0)    75%,
+            rgba(0,0,0,0.04) 100%
+        ),
+        radial-gradient(ellipse 80% 55% at 50% 52%,
+            rgba(255,250,245,0.55) 0%,
+            rgba(255,250,245,0)    100%
+        ),
+        radial-gradient(ellipse 100% 100% at 50% 50%,
+            transparent            55%,
+            rgba(0,0,0,0.055)     100%
+        );
+    pointer-events: none;
     z-index: 1;
 }
-    .header { 
-    position: relative; 
-    z-index: 100; 
-    text-align: center; 
-    padding: 60px 20px; 
-    background-color: #fff; 
-}
-    
-@keyframes glow-pulse {
-    0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2)); }
-    50% { filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6)); }
-}
 
-/* 2. 當卡片翻面 (is-flipped) 且滑鼠靠近按鈕時，讓整個畫框發光 */
-/* 我們直接偵測 flip-card，這樣無論滑鼠在按鈕還是卡片背面上，都會有選取感 */
-.flip-card.is-flipped:hover .flip-back {
-    border-color: #7d5e53; /* 邊框微亮 */
-    box-shadow: 
-        0 0 20px rgba(255, 255, 255, 0.4), 
-        inset 0 0 10px rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
-}
-
-
-
-/* 新增按鈕專屬樣式 */
-.contact-cta {
-    display: inline-block;
-    background-color: #7d5e53; /* 妳的標誌暖褐色 */
-    color: #fff !important;
-    text-decoration: none;
-    padding: 15px 40px;
-    border-radius: 4px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    letter-spacing: 0.05em;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
-
-.contact-cta:hover {
-    background-color: #a68b7c; /* 較淺的褐色，產生互動感 */
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-}
-
-
-
-    /* --- Header 佈局 --- */
-    .header-container { display: flex; align-items: center; justify-content: center; max-width: 1000px; margin: 0 auto; gap: 40px; }
-    .profile-container { position: relative; width: 180px; height: 140px; display: flex; justify-content: center; align-items: center; }
-    .profile-arc { position: absolute; width: 120px; height: 120px; border-radius: 50%; background-color: #e0e0e0; bottom: 6px; z-index: 0; animation: shadow-scale 4s ease-in-out infinite; }
-    .profile-img { position: relative; z-index: 1; width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background-color: #eee; animation: floating 4s ease-in-out infinite; }
-    
-    @keyframes floating { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
-    @keyframes shadow-scale { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.85); opacity: 0.4; } }
-
-    .header-text { text-align: left; flex: 1; max-width: 600px; }
-    .header h1 { font-size: 2.8rem; letter-spacing: 0.2em; margin: 0; font-weight: 400; }
-    .header { 
-    position: relative; 
-    z-index: 100; 
-    text-align: center; 
-    padding: 60px 20px; 
-    background-color: #fff; 
-}
-.gallery-container { 
-    position: relative; 
-    z-index: 10; 
-}
-    .subtitle { color: #7d5e53; font-weight: bold; margin: 10px 0; }
-    .description { margin: 0; font-size: 0.9rem; color: #888; line-height: 1.6; }
-
-/* 讓頭像跟按鈕垂直對齊 */
-.profile-layout {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0px; /* 將間距設為 0，改用 margin 微調 */
-}
-
-.about-me-btn {
-    background-color: transparent;
-    border: 1.2px solid #7d5e53;
-    color: #7d5e53;
-    padding: 6px 20px;
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border-radius: 4px;
-    font-weight: 500;
-}
-
-.about-me-btn:hover {
-    background-color: #7d5e53;
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(125, 94, 83, 0.2);
-}
-
-/* 彈窗背景遮罩 */
-.modal-overlay {
-    display: none !important; 
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(44, 36, 33, 0.75); 
-    
-    /* 核心修正：使用 flex 居中 */
-    justify-content: center;
-    align-items: center;      
-    padding: 20px;            /* 這是最後的保險邊距 */
-    box-sizing: border-box;   /* 確保 padding 不會撐破容器 */
-    
-    z-index: 99999;
-    backdrop-filter: blur(5px);
-}
-/* 彈窗主體 - 延續畫框感 */
-.modal-content {
-    background: #2c2421; 
-    padding: 25px 15px;      /* 手機版左右內距縮小，釋放文字空間 */
-    border-radius: 4px;
-    width: 90%;
-    max-width: 500px;
-    margin: 0;
-    max-height: 85vh;
-    overflow-y: auto;        /* 只保留垂直捲動 */
-    overflow-x: hidden;      /* 嚴禁左右捲動 */
-    scrollbar-width: thin;
-    scrollbar-color: #7d5e53 #2c2421;
-    border: 1px solid #4a3b35;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    display: flex;
-    flex-direction: column;
-    -webkit-overflow-scrolling: touch; 
-}
-
-
-.modal-content::-webkit-scrollbar {
-    width: 4px;
-}
-.modal-content::-webkit-scrollbar-track {
-    background: #2c2421;
-}
-.modal-content::-webkit-scrollbar-thumb {
-    background: #7d5e53;
-    border-radius: 10px;
-}
-
-/* 讓彈窗內容主體與底框保持精緻的留白 */
-.modal-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;    /* 整體水平居中 */
-    text-align: center;     /* 文字預設置中 */
-    width: 100%;
-    padding-bottom: 30px;   /* 確保最下方跟底框有間距 */
-}
-/* 針對有側邊標示（左邊橘條）的區塊，我們維持左對齊比較專業 */
-.modal-body p[style*="border-left"] {
-    text-align: left;
-    width: 100%;            /* 確保寬度足夠顯示邊框 */
-    max-width: 420px;       /* 限制寬度讓它在中間更集中 */
-    margin-left: auto;
-    margin-right: auto;
-}
-/* 讓條列清單在手機版維持左對齊但區塊置中 */
-.modal-body ul {
-    display: inline-block;
-    text-align: left;
-    padding-left: 20px;
-    margin: 0 auto;
-    width: fit-content;
-}
-/* 標題與文字顏色調整 */
-.modal-inner h2 {
-    color: #d7ccc8 !important; /* 淺米色標題 */
-    border-bottom: 2px solid #7d5e53;
-}
-.modal-body p {
-    color: #bcaaa4; /* 柔和的文字色 */
-    font-size: 0.95rem;
-    line-height: 1.8;
-    text-align: justify; /* 左右對齊 */
-    text-justify: inter-character;
-    hyphens: auto;
-}
-
-/* 針對手機版 (max-width: 768px) 的文字優化 */
-@media (max-width: 768px) {
-    /* 1. 增加彈窗主體的內距，強制內文向內靠攏 */
-    .modal-content {
-        padding: 35px 30px !important; /* 增加左右內距到 30px，確保文字遠離邊緣 */
-        width: 85%;                   /* 稍微縮小寬度，讓整體更像懸浮卡片 */
-    }
-
-    
-/* 2. 解決右邊離邊條太近的核心：將雙欄改為單欄排列 */
-    .modal-body div[style*="display: grid"] {
-        grid-template-columns: 1fr !important; /* 強制單欄，釋放水平空間 */
-        gap: 25px !important;                 /* 增加上下項目的間距 */
-        text-align: left;                     /* 保持左對齊 */
-    }
-
-/* 3. 調整文字大小以適應新空間 */
-    .modal-body p, .modal-body li {
-        font-size: 0.88rem !important;
-        line-height: 1.7 !important;
-    }
-
-/* 4. 確保左側有橘色標記的區塊不會因為過窄而顯得侷促 */
-    .modal-body p[style*="border-left"] {
-        padding-left: 15px !important;
-        margin-bottom: 25px !important;
-    }
-
-    /* 聯絡按鈕縮小，避免在窄螢幕破版 */
-    .contact-cta {
-        padding: 12px 20px;
-        font-size: 0.9rem;
-    }
-}
-
-
-
-
-
-
-
-/* 新增：技能標籤樣式 */
-.skill-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 15px;
-}
-.skill-tag {
-    background: rgba(125, 94, 83, 0.2);
-    color: #a68b7c;
-    border: 1px solid #7d5e53;
-    padding: 2px 10px;
-    font-size: 0.75rem;
-    border-radius: 3px;
-    letter-spacing: 0.05em;
-}
-.modal-overlay.active { 
-    display: flex !important; /* 強制開啟 */
-}
-.modal-overlay.active .modal-content {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-}
-
-/* 關閉按鈕 */
-.close-modal {
-    position: fixed; /* 改為 fixed，不隨內容捲動 */
-    top: 20px;       /* 與頂部保持距離 */
-    right: 25px;      /* 與右側保持距離 */
-    font-size: 35px;  /* 稍微放大，手機比較好點擊 */
-    cursor: pointer;
-    color: #d7ccc8;   /* 改為淺色，在深色背景下更明顯 */
-    line-height: 1;
-    z-index: 100001;  /* 確保層級高於彈窗內容 */
-    padding: 10px;    /* 增加點擊區域 */
-    transition: color 0.3s ease;
-}
-
-.close-modal:hover {
-    color: #7d5e53;
-}
-
-/* 針對手機版的微調 */
-@media (max-width: 768px) {
-    .close-modal {
-        top: -3px;
-        right: 15px;
-        font-size: 40px; /* 手機版再放大一點點，方便手指操作 */
-    }
-}
-
-/* 微塵特效 */
 .ambient-particles {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none; z-index: 2;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
     background-image: radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px);
     background-size: 100px 100px;
     animation: particles-drift 20s linear infinite;
     opacity: 0.3;
 }
 
-@keyframes particles-drift {
-    from { transform: translateY(0) translateX(0); }
-    to { transform: translateY(-100px) translateX(20px); }
-}
 
-
-    /* --- 畫廊容器 --- */
-    .gallery-container { 
-        display: flex; 
-        flex-wrap: wrap; 
-        justify-content: center; 
-        align-items: flex-start; 
-        padding: 80px 20px; 
-        gap: 20px;
-        max-width: 1600px; 
-        margin: 0 auto;
-    }
-
-/* 增加一個滑鼠懸停在 ENTER 按鈕時，畫框發光的特效 */
-.enter-btn-fixed:hover {
-    background-color: #a68b7c;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-    transform: translateX(-50%) translateY(-2px) scale(1.05);
-}
-
-
-    /* --- 畫框核心結構 --- */
-.gallery-item { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; /* 確保繩子、畫框、標籤全都對齊中線 */
-    flex-shrink: 0; 
-    
-    
-}
-/* 只有滑鼠移入 item 時，才讓裡面的 flip-card 搖擺 */
-.gallery-item:hover .flip-card { 
-    animation: swing 2s ease-in-out infinite; 
-}
-
-/* 當畫框被懸停時，下方的銘牌標題稍微變色並上浮 */
-.gallery-item:hover .item-title {
-    background-color: #7d5e53;
-    color: #fff;
-    border-color: #7d5e53;
-    transform: translateY(-2px);
-    transition: all 0.3s ease;
-}
-
-/* 定義待機的微小晃動 */
-@keyframes ambient-swing {
-    0%, 100% { transform: rotate(var(--rot)); }
-    50% { transform: rotate(calc(var(--rot) + var(--swing-range, 1.5deg))); }
-}
-
-
-
-/* B. 點擊瞬間的物理回饋 (像按鈕被按下去) */
-.flip-card:active {
-    transform: scale(0.97) rotate(var(--rot)) !important;
-    transition: transform 0.1s ease;
-    will-change: transform, opacity;
-}
-
-/* --- 打字機核心動畫 --- */
-.typewriter-effect {
-    display: block;
-    margin: 0 auto;
-    overflow: hidden;
-    white-space: nowrap;
-    /* 初始狀態就有邊框，但顏色透明 */
-    border-right: 3px solid transparent; 
-    width: fit-content;
-}
-
-/* 當彈窗啟動時觸發 */
-.modal-overlay.active .typewriter-effect {
-    animation: 
-        typing 1.5s steps(15, end) forwards 0.3s, 
-        /* 將 infinite 改為 5 次，閃爍完自動停止 */
-        blink-caret 0.75s step-end 4; 
-}
-
-@keyframes typing {
-    from { width: 0; }
-    to { width: 100%; }
-}
-
-/* 閃爍動畫：最後一幀回到透明 */
-@keyframes blink-caret {
-    from, to { border-color: transparent; }
-    50% { border-color: #7d5e53; }
-}
-
-/* 移除原本影響動畫的 !important，改用更穩定的過渡寫法 */
-.modal-overlay .modal-body p,
-.modal-overlay .modal-body div,
-.modal-overlay .modal-body ul li {
-    opacity: 0;
-    transform: translateY(15px);
-    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-}
-
-/* 只有在 active 狀態下才顯示 */
-.modal-overlay.active .modal-body p,
-.modal-overlay.active .modal-body div,
-.modal-overlay.active .modal-body ul li {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* 階梯延遲：讓內容在打字快結束時開始浮現 */
-.modal-overlay.active .modal-body p:nth-of-type(2) { transition-delay: 1.6s; }
-.modal-overlay.active .modal-body p:nth-of-type(3) { transition-delay: 1.8s; }
-.modal-overlay.active .modal-body .skill-grid { transition-delay: 2.0s; } /* 假設妳有加 class */
-.modal-overlay.active .modal-body p:nth-of-type(4) { transition-delay: 2.2s; }
-
-
-/* --- C. About Me 內容出現的動畫 (優化版) --- */
-
-/* 1. 初始隱藏：使用 visibility 防止偷跑，增加位移距離感 */
-.modal-overlay .modal-body p,
-.modal-overlay .modal-body div,
-.modal-overlay .modal-body ul li {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out, visibility 0.6s;
-    will-change: opacity, transform; /* 告訴瀏覽器這幾個屬性會變動 */
-}
-
-/* 2. 啟動狀態 */
-.modal-overlay.active .modal-body p,
-.modal-overlay.active .modal-body div,
-.modal-overlay.active .modal-body ul li {
-    opacity: 1 !important;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-/* 3. 階梯延遲：改用 nth-of-type，確保每個區塊都能排隊 */
-.modal-overlay.active .modal-body p:nth-of-type(1) { transition-delay: 0.2s; } /* Dolores */
-.modal-overlay.active .modal-body p:nth-of-type(2) { transition-delay: 0.4s; } /* Senior 2D... */
-.modal-overlay.active .modal-body p:nth-of-type(3) { transition-delay: 0.6s; } /* 13+年經驗 */
-.modal-overlay.active .modal-body div:nth-of-type(1) { transition-delay: 0.8s; } /* 技能網格 */
-.modal-overlay.active .modal-body p:nth-of-type(4) { transition-delay: 1.0s; } /* 全方位實務... */
-
-/* 列表項目的階梯感 */
-.modal-overlay.active .modal-body ul li:nth-child(1) { transition-delay: 1.1s; }
-.modal-overlay.active .modal-body ul li:nth-child(2) { transition-delay: 1.2s; }
-.modal-overlay.active .modal-body ul li:nth-child(3) { transition-delay: 1.3s; }
-.modal-overlay.active .modal-body ul li:nth-child(4) { transition-delay: 1.4s; }
-
-/* 最後的按鈕與分割線 */
-.modal-overlay.active .modal-inner h2 { transition: all 0.5s ease 0.1s; }
-.modal-overlay.active .contact-cta { 
-    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.6s; 
-}
-
-/* 走進畫中時，強制隱藏影子層 */
-.flip-card.entering::after {
-    opacity: 0 !important;
-    transition: opacity 0.3s ease;
-}
-
-/* 修改：讓畫框原位後退、變淡 */
-.flip-card.entering {
-    animation: none !important;
-    transform-origin: center center !important; /* 確保從正中心擴張 */
-    pointer-events: none;
-    z-index: 10000;
-}
-
-/* 修正搖擺動畫：以畫框頂部為中心 */
-@keyframes swing { 
-    0%, 100% { transform: rotate(var(--rot)); } 
-    50% { transform: rotate(calc(var(--rot) + 2deg)); } 
-}
-    @keyframes swing-extreme-ani { 0%, 100% { transform: rotate(calc(var(--rot) - 5deg)) scale(1.05); } 50% { transform: rotate(calc(var(--rot) + 8deg)) scale(1.05); } }
-
-    .line { 
-    width: 1.5px; 
-    height: 60px; 
-    background-color: #8c7b75; 
-    position: absolute; /* 改為絕對定位 */
-    top: -60px;        /* 往上推到畫框上方 */
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10; 
-}
-    .line::before { 
-        content: ''; position: absolute; top: -4px; left: 50%; 
-        transform: translateX(-50%); width: 8px; height: 8px; 
-        background-color: #5d4037; border-radius: 50%; 
-        box-shadow: 1px 1px 2px rgba(0,0,0,0.3); 
-    }
-
-    /* --- 3D 翻牌效果 --- */
-.flip-card { 
-    perspective: 1000px; 
-    cursor: pointer; 
-    width: var(--card-w); 
-    height: var(--card-h);
-    transform: rotate(var(--rot)); 
-    transform-origin: center -60px; 
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+/* ─── 3. Header ─────────────────────────────────────────── */
+.header {
     position: relative;
-    box-shadow: none !important;
-    z-index: 5;
-    will-change: transform;
-
-    /* 預設啟動待機動畫 */
-    animation: ambient-swing var(--duration, 3s) ease-in-out infinite;
-    animation-delay: var(--delay, 0s);
-}
-    .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d;
-    -webkit-font-smoothing: antialiased; /* 讓文字邊緣平滑 */
-    backface-visibility: hidden; }
-    .flip-card.is-flipped .flip-card-inner { 
-        transform: rotateY(180deg); 
-        
-    }
-
-
-
-/* 2. 建立一個獨立的「假陰影」層 */
-.flip-card::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.2);
-    box-shadow: 2px 2px 0px rgba(0,0,0,0.02), 8px 8px 15px rgba(0,0,0,0.2);
-    border-radius: 3px;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0.8;
-    transform: translate(6px, 6px) scaleX(1);
+    z-index: 100;
+    text-align: center;
+    padding: 60px 20px;
+    background-color: #fff;
+    transition: background-color 0.4s ease;
 }
 
-/* 翻過去的動畫 */
-@keyframes shadow-flip-to-back {
-    0% { transform: translate(6px, 6px) scaleX(1); }
-    50% { transform: translate(0px, 6px) scaleX(0.15); }
-    100% { transform: translate(4px, 6px) scaleX(1); }
-}
-
-/* 翻回來的動畫 */
-@keyframes shadow-flip-to-front {
-    0% { transform: translate(4px, 6px) scaleX(1); }
-    50% { transform: translate(0px, 6px) scaleX(0.15); }
-    100% { transform: translate(6px, 6px) scaleX(1); }
-}
-
-/* 3. 專屬陰影的搖擺動畫 (不跟著翻轉，只跟著位移) */
-@keyframes shadow-only-swing {
-    0%, 100% { transform: translate(6px, 6px); opacity: 0.8; }
-    50% { transform: translate(12px, 12px); opacity: 0.5; } 
-}
-
-/* 當滑鼠移入 item 時，畫框晃動，影子也跟著「獨立」晃動 */
-.gallery-item:hover .flip-card:not(.is-flipped):not(.flipping-back)::after {
-    animation: shadow-only-swing 2s ease-in-out infinite;
-}
-
-/* 只有在翻轉狀態下才執行影子動畫 */
-.flip-card.is-flipped::after {
-    animation: shadow-flip-to-back 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    opacity: 0.6;
-}
-
-.flip-card.flipping-back::after {
-    animation: shadow-flip-to-front 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-/* 如果你還是想要滑鼠移入時有「微晃感」，建議只針對本體畫框做 swing */
-.gallery-item:hover .flip-card {
-    animation: swing 2s ease-in-out infinite;
-}
-/* 不要對影子做單獨的 shadow-only-swing，這樣點擊翻轉時才不會衝突 */
-
-
-    /* --- 懸浮標牌標題 (恢復滿意版本) --- */
-.item-title {
-    position: relative; 
-    margin-top: 25px;   
-    background-color: #ffffff; /* 改為純白更像銘牌 */
-    padding: 6px 30px;         /* 增加左右內距給釘子留空間 */
-    border: 1px solid #dcdcdc;
-    font-size: 16px;    
-    font-weight: 600;
-    color: #5d4037;
-    white-space: nowrap;
-    letter-spacing: 0.1em;
-    box-shadow: 1px 1px 4px rgba(0,0,0,0.05); /* 輕微投影 */
-    z-index: 5;
-    display: inline-flex;
+.header-container {
+    display: flex;
     align-items: center;
     justify-content: center;
-    /* 保持妳原本的銘牌樣式，但加入基準點 */
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    transform-origin: center top; /* 以頂部為軸心 */
-}
-/* 左側釘子 */
-.item-title::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 10px;               /* 釘子位置 */
-    transform: translateY(-50%);
-    width: 6px;               /* 釘子大小 */
-    height: 6px;
-    background-color: #8c7b75; /* 釘子顏色，與掛繩一致 */
-    border-radius: 50%;
-    box-shadow: inset 1px 1px 1px rgba(0,0,0,0.3); /* 增加凹陷立體感 */
-}
-/* 右側釘子 */
-.item-title::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: 10px;              /* 釘子位置 */
-    transform: translateY(-50%);
-    width: 6px;
-    height: 6px;
-    background-color: #8c7b75;
-    border-radius: 50%;
-    box-shadow: inset 1px 1px 1px rgba(0,0,0,0.3);
+    max-width: 1000px;
+    margin: 0 auto;
+    gap: 40px;
 }
 
-/* --- 畫框邊框對作品紙張的投影 --- */
-.frame { 
-    background-color: #fff; 
-    padding: 12px 12px 35px; 
-    border: 10px solid #2c2421; 
-    /* 修改這裡：增加一個 inset 陰影 */
-    /* 第一組是原本對牆面的投影，第二組是框對紙的內投影 */
-    box-shadow: 
-        8px 12px 20px rgba(0,0,0,0.1), 
-        inset 0 0 3px rgba(104, 104, 104, 0.8); 
-    
-    position: absolute; 
-    top:0; left:0; 
-    width: 100%; 
-    height: 100%;
-    backface-visibility: hidden; 
-    -webkit-backface-visibility: hidden; 
-    box-sizing: border-box; 
+/* Profile photo */
+.profile-layout {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    gap: 0;
 }
-    /* 核心修改：讓 image-box 產生被邊框「壓住」的陰影感 */
-.image-box { 
-    background: #eee; 
-    overflow: hidden; 
-    width: 100%; 
-    height: 100%; 
+
+.profile-container {
     position: relative;
-    /* 建立獨立層級 */
-    transform: translateZ(0); 
-    box-shadow: 0 0 5px rgba(0,0,0,0.1); 
+    width: 180px;
+    height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-
-
-.image-box img { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; 
-    display: block;
-    position: relative;
-    z-index: 1; /* 圖片放在最底層 */
-}
-    
-    /* 1. 確保背面在翻轉後擁有優先判定權 */
-.flip-back { 
-    transform: rotateY(180deg) translateZ(1px); /* 增加 1px 的 Z 軸高度，確保它在最前面 */
-    background-color: #fff9f5; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: center; 
-    align-items: center; 
-    backface-visibility: hidden;
-}
-
-
-
-    /* --- 背面內容 --- */
-    .back-content { 
-    text-align: center; 
-    padding: 15px 15px 60px; /* 增加底部內距 (60px)，確保文字不被按鈕蓋住 */
-    width: 100%; 
-    box-sizing: border-box; /* 確保 padding 不會撐破容器 */
-}
-    .back-content h3 { 
-    color: #5d4037; 
-    font-size: 1.4rem; /* 原本 1rem -> 改為 1.2rem，讓標題更醒目 */
-    margin-bottom: 12px; 
-}
-    .back-content p { 
-    color: #666; /* 顏色稍微深一點，提升閱讀對比度 */
-    font-size: 0.95rem; /* 原本 0.75rem -> 改為 0.95rem，這是中文閱讀較舒適的大小 */
-    margin-bottom: 15px; 
-    line-height: 1.6; /* 增加行高，避免文字擠在一起 */
-    padding: 0 10px; 
-}
-
-/* 新的按鈕樣式：獨立於翻轉容器之外 */
-.enter-btn-fixed {
+.profile-arc {
     position: absolute;
-    bottom: 30px; /* 對準背面 content 的位置 */
-    left: 50%;
-    transform: translateX(-50%) translateZ(10px); /* 確保在 3D 最上層 */
-    background-color: #5d4037;
-    color: white;
-    border: none;
-    padding: 8px 18px;
-    border-radius: 4px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    bottom: 6px;
+    z-index: 0;
+    animation: shadow-scale 4s ease-in-out infinite;
+}
+
+.profile-img {
+    position: relative;
+    z-index: 1;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #eee;
+    animation: floating 4s ease-in-out infinite;
+}
+
+/* Header text */
+.header-text { text-align: left; flex: 1; max-width: 600px; }
+
+.header-text h1 {
+    font-size: 3rem;
+    letter-spacing: 0.35em;
+    margin: 0 0 4px;
+    font-weight: 200;
+    color: #2c2421;
+    text-shadow: 0 1px 12px rgba(125,94,83,0.12);
+    animation: header-fadein 1s ease both;
+    transition: color 0.4s ease;
+}
+
+.header-text .subtitle {
+    color: var(--color-brown-mid);
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    margin: 12px 0 8px;
+    padding-left: 14px;
+    border-left: 2px solid var(--color-brown-mid);
+    animation: header-fadein 1s ease 0.3s both;
+}
+
+.header-text .description {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #999;
+    line-height: 1.7;
+    padding-left: 14px;
+    animation: header-fadein 1s ease 0.55s both;
+}
+
+@keyframes header-fadein {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* About Me button */
+.about-me-btn {
+    background-color: transparent;
+    border: 1.2px solid var(--color-brown-mid);
+    color: var(--color-brown-mid);
+    padding: 6px 20px;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
     cursor: pointer;
-    font-size: 0.9rem;
-    z-index: 9999;
-    
-    /* 關鍵：初始隱藏，只有翻面後才讓它可點擊 */
-    opacity: 0;
-    pointer-events: none;
-
-    transition: all 0.3s ease;/* 重點：讓所有屬性過渡耗時 0.3s，但「延遲」0.4s 才開始執行 */
-    transition-delay: 0s; /* 預設回正面時不延遲，立即消失 */
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.3s, color 0.3s, transform 0.3s, box-shadow 0.3s;
 }
 
-/* 當父層 .flip-card 帶有 .is-flipped 時，顯示按鈕 */
-.flip-card.is-flipped .enter-btn-fixed {
-    opacity: 1;
-    pointer-events: auto;
-    /* 關鍵：翻過來的時候晚 0.4 秒出現 */
-    transition-delay: 0.2s;
+.about-me-btn:hover {
+    background-color: var(--color-brown-mid);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(125, 94, 83, 0.2);
 }
 
-
-    /* 2. 讓按鈕絕對可以被點到 */
-.enter-btn { 
-    position: relative;
-    z-index: 999; /* 內部最高層級 */
-    background-color: #5d4037; 
-    color: white; 
-    border: none; 
-    padding: 8px 18px; 
-    border-radius: 4px; 
-    cursor: pointer; 
-    font-size: 0.9rem;
-    pointer-events: auto !important; /* 強制接收點擊 */
-}
-
-    /* --- 尺寸與色彩個性定義 --- */
-    .item-1 { --rot: -4deg; --card-w: 270px; --card-h: 240px; } .item-1 .frame { border-color: #2c2421; }
-    .item-2 { --rot: 3deg;  --card-w: 222px; --card-h: 245px; } .item-2 .frame { border-color: #8d7065; }
-    .item-3 { --rot: -1deg; --card-w: 292px; --card-h: 412px; } .item-3 .frame { border-color: #2c2421; border-width: 14px; }
-    .item-4 { --rot: 4deg;  --card-w: 305px; --card-h: 245px; } .item-4 .frame { border-color: #b7a39a; }
-    .item-5 { --rot: -2deg; --card-w: 265px; --card-h: 285px; } .item-5 .frame { border-color: #2c2421; }
-    .item-6 { --rot: 2deg;  --card-w: 256px; --card-h: 319px; } .item-6 .frame { border-color: #5d4037; }
-    .item-7 { --rot: -3deg; --card-w: 336px; --card-h: 231px; } .item-7 .frame { border-color: #a68b7c; border-width: 8px; }
-    .item-8 { --rot: 1.5deg;--card-w: 267px; --card-h: 267px; } .item-8 .frame { border-color: #2c2421; }
-    .item-9 { --rot: -5deg; --card-w: 309px; --card-h: 225px; } .item-9 .frame { border-color: #3e2723; }
-    .item-10 { --rot: 3.5deg;--card-w: 250px; --card-h: 302px; } .item-10 .frame { border-color: #2c2421; border-width: 12px; }
-
-    /* --- 電腦版 5 欄排版修正 --- */
-    @media (min-width: 1025px) {
-        .gallery-container { padding: 80px 20px; row-gap: 120px; column-gap: 20px; }
-        .item-1, .item-6 { margin-top: 40px; }
-        .item-2, .item-7 { margin-top: 100px; }
-        .item-3, .item-8 { margin-top: 0px; }
-        .item-4, .item-9 { margin-top: 60px; }
-        .item-5, .item-10 { margin-top: 30px; }
-    }
-
-    @media (min-width: 1800px) {
-        .gallery-container { max-width: 1500px; } /* 修正大螢幕寬度，確保塞下 5 個 */
-    }
-
-    /* 手機版 RWD 優化 */
-    @media (max-width: 768px) {
-        .back-content {
-        padding: 10px 10px 80px; /* 增加底部內距，預留空間給 ENTER */
-    }
-    .back-content h3 {
-        font-size: 1rem;       /* 標題縮小 */
-        margin-bottom: 5px;
-    }
-    .back-content p {
-        font-size: 0.8rem;     /* 內容縮小 */
-        line-height: 1.4;
-        margin-bottom: 10px;
-    }
-        .header-container { flex-direction: column; text-align: center; }
-        .header-text { text-align: center; padding: 0 20px; }
-        .gallery-container { 
-        gap: 80px; /* 增加上下項目的間距，給擺動留空間 */
-        padding: 60px 20px; 
-    }
-        .gallery-item { margin-top: 0 !important; }
-        .flip-card { 
-        width: 75vw !important; 
-        max-width: 300px !important; 
-        height: auto !important; 
-        aspect-ratio: var(--ratio, 1/1);
-        transform-origin: center -35px; /* 改為手機版的繩子長度 */
-    }
-        .item-title {
-        font-size: 15px;
-        margin-top: 15px; 
-        padding: 4px 20px;
-        bottom: auto; /* 確保重置原本的絕對定位 */
-    }
-        .item-1 { --ratio: 220/160; } .item-3 { --ratio: 240/340; } .item-4 { --ratio: 260/180; }
-        .item-6 { --ratio: 200/260; } .item-7 { --ratio: 280/180; } .item-9 { --ratio: 250/170; } .item-10 { --ratio: 190/240; }
-        .line { 
-        height: 35px; 
-        top: -35px; 
-    }
-    }
-
-/* --- Debug Mode 樣式集 --- */
-/* 畫框變綠色虛線選框 */
-body.debug-mode .frame {
-    /* 使用亮綠色但降低邊框透明度 */
-    border: 2px dashed rgba(0, 255, 102, 0.7) !important;
-    background: rgba(0, 255, 102, 0.03) !important; /* 極淡的綠色底，增加「選中」感 */
-}
-
-/* 顯示模擬的引擎數據 */
-body.debug-mode .image-box::after {
-    /* 內容保持不變 */
-    content: "● SIMULATED SPEC | TEX: 512px | DC: 1 | Tris: 124";
-    
-    /* 核心色調修改 */
-    background: rgba(20, 20, 20, 0.85); /* 深灰近黑，85% 透明度更有層次感 */
-    color: #00ff66;                    /* 改用稍微偏青的綠，比純綠更具科技感 */
-    border: 1px solid rgba(0, 255, 102, 0.5); /* 增加一個半透明的小邊框，像 HUD 介面 */
-    
-    /* 字體與間距微調 */
-    font-family: 'Consolas', 'Monaco', monospace;
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 2px;
-    
-    /* 確保位置在左下角且不被遮擋 */
-    position: absolute;
-    bottom: 8px; 
-    left: 8px;
-    z-index: 100;
-    
-    /* 增加一個微妙的發光感 */
-    text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
-    pointer-events: none; /* 讓滑鼠點擊可以穿透標籤，不干擾卡片翻轉 */
-}
-
-/* 顯示座標軸 Gizmos */
-body.debug-mode .gallery-item::before {
-    content: "";
-    position: absolute;
-    top: -30px; left: 50%;
-    width: 2px; height: 30px;
-    background: linear-gradient(to bottom, #ff0000, #0000ff);
-    z-index: 20;
-}
-
-/* Debug Mode 開關的專屬樣式 */
+/* Dev View toggle */
 .debug-toggle-container {
     position: absolute;
     top: 20px;
@@ -899,300 +239,1020 @@ body.debug-mode .gallery-item::before {
     letter-spacing: 1px;
 }
 
-</style>
+/* Dark mode toggle button */
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 200;
+    background: transparent;
+    border: 1.2px solid var(--color-brown-mid);
+    color: var(--color-brown-mid);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s, color 0.3s, transform 0.3s;
+    line-height: 1;
+}
+
+.theme-toggle:hover {
+    background-color: var(--color-brown-mid);
+    color: #fff;
+    transform: rotate(15deg) scale(1.05);
+}
+
+
+/* ─── 4. Gallery Layout ─────────────────────────────────── */
+.gallery-container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 80px 20px;
+    gap: 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+
+/* ─── 5. Gallery Item ───────────────────────────────────── */
+.gallery-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.gallery-item:hover .flip-card {
+    animation: swing 2s ease-in-out infinite;
+}
+
+.gallery-item {
+    transition: filter 0.4s ease;
+}
+
+.flip-card.spotlight-near .frame.flip-front {
+    border-color: color-mix(in srgb, var(--frame-color, var(--color-dark)) 60%, #d4b896 40%);
+    box-shadow:
+        8px 12px 20px rgba(0,0,0,0.1),
+        inset 0 0 3px rgba(104,104,104,0.8),
+        0 0 18px rgba(212, 184, 150, 0.25);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.gallery-item.spotlight-dim {
+    filter: brightness(0.92);
+}
+
+
+/* ─── 6. Flip Card ──────────────────────────────────────── */
+.flip-card {
+    perspective: 1000px;
+    cursor: pointer;
+    width: var(--card-w);
+    height: var(--card-h);
+    transform: rotate(var(--rot));
+    transform-origin: center -60px;
+    position: relative;
+    z-index: 5;
+    will-change: transform;
+    animation: ambient-swing var(--duration, 3s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: var(--transition-card);
+    transform-style: preserve-3d;
+    -webkit-font-smoothing: antialiased;
+}
+
+.flip-card.is-flipped .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card:active {
+    transform: scale(0.97) rotate(var(--rot)) !important;
+    transition: transform 0.1s ease;
+}
+
+.flip-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.2);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.02), 8px 8px 15px rgba(0,0,0,0.2);
+    border-radius: 3px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.8;
+    transform: translate(6px, 6px) scaleX(1);
+}
+
+.gallery-item:hover .flip-card:not(.is-flipped):not(.flipping-back)::after {
+    animation: shadow-only-swing 2s ease-in-out infinite;
+}
+
+.flip-card.is-flipped::after {
+    animation: shadow-flip-to-back 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+    opacity: 0.6;
+}
+
+.flip-card.flipping-back::after {
+    animation: shadow-flip-to-front 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+/* SVG 繩子 */
+.rope-svg {
+    position: absolute;
+    top: -73px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 73px;
+    overflow: visible;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.rope-line {
+    fill: none;
+    stroke: var(--color-rope);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    transition: d 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rope-pin {
+    fill: var(--color-brown);
+    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.35));
+}
+
+
+/* ─── 7. Frame & Image Box ──────────────────────────────── */
+.frame {
+    background-color: #fff;
+    padding: 12px 12px 35px;
+    border: 10px solid var(--color-dark);
+    box-shadow: 8px 12px 20px rgba(0,0,0,0.1), inset 0 0 3px rgba(104,104,104,0.8);
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+
+.image-box {
+    background: #eee;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform: translateZ(0);
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+.image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+.flip-back {
+    transform: rotateY(180deg) translateZ(1px);
+    background-color: #fff9f5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.flip-card.is-flipped:hover .flip-back {
+    border-color: var(--color-brown-mid);
+    box-shadow: 0 0 20px rgba(255,255,255,0.4), inset 0 0 10px rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+}
+
+
+/* ─── 8. Card Back Content ──────────────────────────────── */
+.back-content {
+    text-align: center;
+    padding: 15px 15px 60px;
+    width: 100%;
+}
+
+.back-content h3 {
+    color: var(--color-brown);
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+}
+
+.back-content p {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    line-height: 1.6;
+    padding: 0 10px;
+}
+
+.back-content .tech-tags {
+    color: #b7a39a;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.enter-btn-fixed {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateZ(10px);
+    background-color: var(--color-brown);
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, background-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    transition-delay: 0s;
+}
+
+.flip-card.is-flipped .enter-btn-fixed {
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0.2s;
+}
+
+.enter-btn-fixed:hover {
+    background-color: var(--color-brown-light);
+    box-shadow: 0 0 15px rgba(255,255,255,0.8);
+    transform: translateX(-50%) translateY(-2px) scale(1.05);
+}
+
+
+/* ─── 9. Name Plate (item-title) ────────────────────────── */
+.item-title {
+    position: relative;
+    margin-top: 25px;
+    background: linear-gradient(160deg, #ffffff 60%, #f0ebe8 100%);
+    padding: 7px 32px;
+    border: 1px solid #d8d0cc;
+    border-bottom: 3px solid #c4b8b2;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-brown);
+    white-space: nowrap;
+    letter-spacing: 0.1em;
+    box-shadow:
+        inset 0  1px 0 rgba(255,255,255,0.9),
+        inset 0 -1px 0 rgba(0,0,0,0.08),
+        2px 3px 8px rgba(0,0,0,0.10);
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: perspective(300px) rotateX(4deg);
+    transform-origin: center top;
+    transition:
+        background 0.35s ease,
+        color       0.35s ease,
+        border-color 0.35s ease,
+        transform   0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        box-shadow  0.35s ease;
+}
+
+.gallery-item:hover .item-title {
+    background: linear-gradient(160deg, var(--color-brown-mid) 0%, #6a4f45 100%);
+    color: #fff;
+    border-color: #6a4f45;
+    border-bottom-color: #4a3530;
+    box-shadow:
+        inset 0  1px 0 rgba(255,255,255,0.2),
+        inset 0 -1px 0 rgba(0,0,0,0.2),
+        3px 5px 14px rgba(0,0,0,0.18);
+    transform: perspective(300px) rotateX(0deg) translateY(-3px);
+}
+
+.item-title::before,
+.item-title::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 7px;
+    height: 7px;
+    background: radial-gradient(circle at 35% 35%, #b0a09a, #5d4037);
+    border-radius: 50%;
+    box-shadow: inset 1px 1px 1px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.item-title::before { left: 10px; }
+.item-title::after  { right: 10px; }
+
+
+/* ─── 10. Modal (About Me) ──────────────────────────────── */
+.modal-overlay {
+    display: none !important;
+    position: fixed;
+    inset: 0;
+    background: rgba(44, 36, 33, 0.75);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 99999;
+    backdrop-filter: blur(5px);
+}
+
+.modal-overlay.active {
+    display: flex !important;
+}
+
+.modal-content {
+    background: var(--color-modal-bg);
+    padding: 25px 15px;
+    border-radius: 4px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 85vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-brown-mid) var(--color-modal-bg);
+    border: 1px solid #4a3b35;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-content::-webkit-scrollbar { width: 4px; }
+.modal-content::-webkit-scrollbar-track { background: var(--color-modal-bg); }
+.modal-content::-webkit-scrollbar-thumb { background: var(--color-brown-mid); border-radius: 10px; }
+
+.modal-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    padding-bottom: 30px;
+}
+
+.modal-inner h2 {
+    color: #d7ccc8 !important;
+    border-bottom: 2px solid var(--color-brown-mid);
+    margin-top: 0;
+}
+
+.modal-body p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    text-align: justify;
+    text-justify: inter-character;
+    hyphens: auto;
+}
+
+.modal-body p[style*="border-left"] {
+    text-align: left;
+    width: 100%;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.modal-body ul {
+    display: inline-block;
+    text-align: left;
+    padding-left: 20px;
+    margin: 0 auto;
+    width: fit-content;
+}
+
+.skill-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+.skill-tag {
+    background: rgba(125, 94, 83, 0.2);
+    color: var(--color-brown-light);
+    border: 1px solid var(--color-brown-mid);
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+}
+
+.contact-cta {
+    display: inline-block;
+    background-color: var(--color-brown-mid);
+    color: #fff !important;
+    text-decoration: none;
+    padding: 15px 40px;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.contact-cta:hover {
+    background-color: var(--color-brown-light);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.close-modal {
+    position: fixed;
+    top: 20px;
+    right: 25px;
+    font-size: 35px;
+    cursor: pointer;
+    color: #d7ccc8;
+    line-height: 1;
+    z-index: 100001;
+    padding: 10px;
+    transition: color 0.3s;
+}
+
+.close-modal:hover { color: var(--color-brown-mid); }
+
+.modal-overlay .modal-body p,
+.modal-overlay .modal-body div,
+.modal-overlay .modal-body ul li {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out, visibility 0.6s;
+    will-change: opacity, transform;
+}
+
+.modal-overlay.active .modal-body p,
+.modal-overlay.active .modal-body div,
+.modal-overlay.active .modal-body ul li {
+    opacity: 1 !important;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.modal-overlay.active .modal-body p:nth-of-type(1) { transition-delay: 0.2s; }
+.modal-overlay.active .modal-body p:nth-of-type(2) { transition-delay: 0.4s; }
+.modal-overlay.active .modal-body p:nth-of-type(3) { transition-delay: 0.6s; }
+.modal-overlay.active .modal-body div:nth-of-type(1) { transition-delay: 0.8s; }
+.modal-overlay.active .modal-body p:nth-of-type(4) { transition-delay: 1.0s; }
+.modal-overlay.active .modal-body ul li:nth-child(1) { transition-delay: 1.1s; }
+.modal-overlay.active .modal-body ul li:nth-child(2) { transition-delay: 1.2s; }
+.modal-overlay.active .modal-body ul li:nth-child(3) { transition-delay: 1.3s; }
+.modal-overlay.active .modal-body ul li:nth-child(4) { transition-delay: 1.4s; }
+.modal-overlay.active .contact-cta {
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.6s;
+}
+
+.typewriter-effect {
+    display: block;
+    margin: 0 auto;
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 3px solid transparent;
+    width: fit-content;
+}
+
+.modal-overlay.active .typewriter-effect {
+    animation:
+        typing 1.5s steps(15, end) forwards 0.3s,
+        blink-caret 0.75s step-end 4;
+}
+
+
+/* ─── 11. Animations ────────────────────────────────────── */
+@keyframes floating      { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes shadow-scale  { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.85); opacity: 0.4; } }
+@keyframes swing         { 0%, 100% { transform: rotate(var(--rot)); } 50% { transform: rotate(calc(var(--rot) + 2deg)); } }
+@keyframes ambient-swing { 0%, 100% { transform: rotate(var(--rot)); } 50% { transform: rotate(calc(var(--rot) + var(--swing-range, 1.5deg))); } }
+@keyframes particles-drift { from { transform: translateY(0) translateX(0); } to { transform: translateY(-100px) translateX(20px); } }
+@keyframes typing        { from { width: 0; } to { width: 100%; } }
+@keyframes blink-caret   { from, to { border-color: transparent; } 50% { border-color: var(--color-brown-mid); } }
+@keyframes shadow-only-swing  { 0%, 100% { transform: translate(6px, 6px); opacity: 0.8; } 50% { transform: translate(12px, 12px); opacity: 0.5; } }
+@keyframes shadow-flip-to-back  { 0% { transform: translate(6px, 6px) scaleX(1); } 50% { transform: translate(0, 6px) scaleX(0.15); } 100% { transform: translate(4px, 6px) scaleX(1); } }
+@keyframes shadow-flip-to-front { 0% { transform: translate(4px, 6px) scaleX(1); } 50% { transform: translate(0, 6px) scaleX(0.15); } 100% { transform: translate(6px, 6px) scaleX(1); } }
+
+.gallery-item .flip-card { opacity: 1; }
+.gallery-item:hover .flip-card { animation: swing 2s ease-in-out infinite; }
+
+.rope-svg {
+    position: absolute;
+    top: -62px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 66px;
+    overflow: visible;
+    z-index: 10;
+    pointer-events: none;
+}
+.rope-svg .rope-pin { fill: var(--color-brown); filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3)); }
+.rope-svg .rope-line { stroke: var(--color-rope); stroke-width: 1.5; fill: none; stroke-linecap: round; transition: d 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.line { display: none; }
+
+.flip-card.entering { animation: none !important; pointer-events: none; z-index: 10000; }
+.flip-card.entering::after { opacity: 0 !important; transition: opacity 0.3s ease; }
+
+
+/* ─── 12. Debug Mode ────────────────────────────────────── */
+body.debug-mode .frame {
+    border: 2px dashed rgba(0, 255, 102, 0.7) !important;
+    background: rgba(0, 255, 102, 0.03) !important;
+}
+body.debug-mode .image-box::after {
+    content: "● SIMULATED SPEC | TEX: 512px | DC: 1 | Tris: 124";
+    background: rgba(20,20,20,0.85);
+    color: #00ff66;
+    border: 1px solid rgba(0,255,102,0.5);
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    position: absolute;
+    bottom: 8px; left: 8px;
+    z-index: 100;
+    text-shadow: 0 0 5px rgba(0,255,102,0.5);
+    pointer-events: none;
+}
+body.debug-mode .gallery-item::before {
+    content: "";
+    position: absolute;
+    top: -30px; left: 50%;
+    width: 2px; height: 30px;
+    background: linear-gradient(to bottom, #f00, #00f);
+    z-index: 20;
+}
+
+
+/* ─── 13. Responsive (Mobile) ───────────────────────────── */
+@media (min-width: 1025px) {
+    .gallery-container { padding: 80px 20px; row-gap: 120px; column-gap: 20px; }
+    .item-1, .item-6  { margin-top:  40px; }
+    .item-2, .item-7  { margin-top: 100px; }
+    .item-3, .item-8  { margin-top:   0px; }
+    .item-4, .item-9  { margin-top:  60px; }
+    .item-5, .item-10 { margin-top:  30px; }
+}
+@media (min-width: 1800px) { .gallery-container { max-width: 1500px; } }
+
+@media (max-width: 768px) {
+    .header-container { flex-direction: column; text-align: center; }
+    .header-text { text-align: center; padding: 0 20px; }
+    .gallery-container { gap: 80px; padding: 60px 20px; }
+    .gallery-item { margin-top: 0 !important; }
+    .flip-card {
+        width: 75vw !important; max-width: 300px !important;
+        height: auto !important; aspect-ratio: var(--ratio, 1/1);
+        transform-origin: center -35px;
+    }
+    .line { height: 35px; top: -35px; }
+    .item-title { font-size: 15px; margin-top: 15px; padding: 4px 20px; bottom: auto; }
+    .back-content { padding: 10px 10px 80px; }
+    .back-content h3 { font-size: 1rem; margin-bottom: 5px; }
+    .back-content p  { font-size: 0.8rem; line-height: 1.4; margin-bottom: 10px; }
+    .modal-content { padding: 35px 30px !important; width: 85%; }
+    .modal-body div[style*="display: grid"] { grid-template-columns: 1fr !important; gap: 25px !important; text-align: left; }
+    .modal-body p, .modal-body li { font-size: 0.88rem !important; line-height: 1.7 !important; }
+    .modal-body p[style*="border-left"] { padding-left: 15px !important; margin-bottom: 25px !important; }
+    .contact-cta { padding: 12px 20px; font-size: 0.9rem; }
+    .close-modal { top: -3px; right: 15px; font-size: 40px; }
+    .item-1  { --ratio: 220/160; } .item-3  { --ratio: 240/340; }
+    .item-4  { --ratio: 260/180; } .item-6  { --ratio: 200/260; }
+    .item-7  { --ratio: 280/180; } .item-9  { --ratio: 250/170; }
+    .item-10 { --ratio: 190/240; }
+}
+
+/* Per-item sizes */
+.item-1  { --rot: -4deg;   --card-w: 270px; --card-h: 240px; }
+.item-2  { --rot:  3deg;   --card-w: 222px; --card-h: 245px; } .item-2 .frame  { border-color: #8d7065; }
+.item-3  { --rot: -1deg;   --card-w: 292px; --card-h: 412px; } .item-3 .frame  { border-width: 14px; }
+.item-4  { --rot:  4deg;   --card-w: 305px; --card-h: 245px; } .item-4 .frame  { border-color: #b7a39a; }
+.item-5  { --rot: -2deg;   --card-w: 265px; --card-h: 285px; }
+.item-6  { --rot:  2deg;   --card-w: 256px; --card-h: 319px; } .item-6 .frame  { border-color: #5d4037; }
+.item-7  { --rot: -3deg;   --card-w: 336px; --card-h: 231px; } .item-7 .frame  { border-color: #a68b7c; border-width: 8px; }
+.item-8  { --rot:  1.5deg; --card-w: 267px; --card-h: 267px; }
+.item-9  { --rot: -5deg;   --card-w: 309px; --card-h: 225px; } .item-9 .frame  { border-color: #3e2723; }
+.item-10 { --rot:  3.5deg; --card-w: 250px; --card-h: 302px; } .item-10 .frame { border-width: 12px; }
+
+
+/* ─── 14. Dark Mode ─────────────────────────────────────── */
+body.dark {
+    --color-bg:          #16110e;
+    --color-dark:        #b8a090;
+    --color-brown:       #c9a882;
+    --color-brown-mid:   #a07858;
+    --color-brown-light: #c9a882;
+    --color-rope:        #6a5a4e;
+    --color-modal-bg:    #1e1612;
+    --color-text-muted:  #9e8a7a;
+
+    background-image:
+        radial-gradient(#221a15 1px, transparent 0),
+        radial-gradient(#221a15 1px, transparent 0);
+}
+
+body.dark .header {
+    background-color: #0f0b09;
+}
+
+body.dark .header-text h1 {
+    color: #e8ddd5;
+}
+
+body.dark .header-text .description {
+    color: #7a6a60;
+}
+
+body.dark .frame {
+    background-color: #1e1814;
+}
+
+body.dark .flip-back {
+    background-color: #221a14;
+}
+
+body.dark .back-content p {
+    color: #9e8a7a;
+}
+
+body.dark .item-title {
+    background: linear-gradient(160deg, #2a211c 60%, #221a16 100%);
+    border-color: #4a3b32;
+    border-bottom-color: #3a2c25;
+    color: #c9b8a8;
+    box-shadow:
+        inset 0  1px 0 rgba(255,255,255,0.05),
+        inset 0 -1px 0 rgba(0,0,0,0.3),
+        2px 3px 8px rgba(0,0,0,0.4);
+}
+
+body.dark .gallery-item:hover .item-title {
+    background: linear-gradient(160deg, #a07858 0%, #7a5840 100%);
+    border-color: #7a5840;
+    border-bottom-color: #5a3e2c;
+    color: #fff;
+}
+
+body.dark .profile-arc {
+    background-color: #3a2e28;
+}
+
+    </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <header class="header">
     <div class="debug-toggle-container">
         <span class="debug-label">[ Dev View ]</span>
-        <input type="checkbox" id="debugToggle" onclick="toggleDebugMode()">
+        <input type="checkbox" id="debugToggle">
     </div>
-<div class="header-container">
-    <div class="profile-layout"> <div class="profile-container">
-            <div class="profile-arc"></div>
-            <img src="Head_02.webp" alt="Dolores" class="profile-img">
+
+    <!-- Dark mode toggle: &#x1F319; = moon, &#x2600;&#xFE0F; = sun -->
+    <button class="theme-toggle" id="themeToggle" aria-label="切換夜間模式">&#x1F319;</button>
+
+    <div class="header-container">
+        <div class="profile-layout">
+            <div class="profile-container">
+                <div class="profile-arc"></div>
+                <img src="Head_02.webp" alt="Dolores" class="profile-img">
+            </div>
+            <button class="about-me-btn" id="aboutMeBtn">ABOUT ME</button>
         </div>
-        <button class="about-me-btn" onclick="openAboutModal()">ABOUT ME</button>
+
+        <div class="header-text">
+            <h1>DOLORES</h1>
+            <div class="subtitle">資深 2D 美術 | 13 年遊戲開發經驗 | 遊戲製程開發</div>
+            <p class="description">深耕產業多年，具備專案從視覺風格發想到素材進引擎（Unity或Cocos）調整、上線的完整實務經驗</p>
+        </div>
     </div>
-    
-    <div class="header-text">
-        
-        <h1>DOLORES</h1>
-        <div class="subtitle">資深 2D 美術 | 13 年遊戲開發經驗 | 遊戲製程開發</div>
-        <p class="description">深耕產業多年，具備專案從視覺風格發想到素材進引擎（Unity或Cocos）調整、上線的完整實務經驗</p>
-    </div>
-</div>
 </header>
 
-<main class="gallery-container">
-    <script>
+
+<!-- GALLERY -->
+<main class="gallery-container" id="gallery"></main>
 
 
+<!-- ABOUT ME MODAL -->
+<div class="modal-overlay" id="aboutModal" role="dialog" aria-modal="true" aria-label="About Me">
+    <div class="modal-content">
+        <span class="close-modal" id="closeModal" aria-label="關閉">&times;</span>
+        <div class="modal-inner">
+            <h2>ABOUT ME</h2>
+            <div class="modal-body">
+                <p style="margin-bottom: 5px;">
+                    <span class="typewriter-effect" style="color:#fff; font-size:1.3rem; letter-spacing:0.1em; font-weight:bold;">Dolores</span>
+                </p>
+                <p style="color:#a68b7c; font-weight:bold; margin-top:0; font-size:0.9rem;">
+                    Senior 2D Artist / Lead Artist<br>
+                    <span style="color:#7d5e53; font-size:0.8rem; font-weight:normal;">Logic-Driven Creativity &amp; Pipeline Optimization</span>
+                </p>
 
-        const works = [
-            { id: 1, title: '前端美術界面整合', bT: '前端美術整合', d: '負責各美術物件導入引擎、建立分頁prefab檔、檢查引擎美術資源優化。', s: 'Unity / Cocos / CSS' },
-            { id: 2, title: '角色&場物設計', bT: '視覺形象開發', d: '各風格角色設計與場景物件設定', s: 'Photoshop / SAI' },
-            { id: 3, title: '專案規劃(主美術)', bT: '主美術管理', d: '帶領美術團隊，控管專案視覺品質與時程。', s: 'Management / Design' },
-            { id: 4, title: 'SPINE相關', bT: '2D 骨架動畫', d: '人物動態、Icon動畫、角色戰鬥動作與過場演出。', s: 'Spine 2D / Animation' },
-            { id: 5, title: '粒子動態等', bT: '特效資源管理', d: '粒子系統優化與各類環境特效製作。', s: 'Unity Particle / FX' },
-            { id: 6, title: 'UI設計及參與專案', bT: '專案UI及按鈕設計', d: '依據專案風格創作繪製UI及按鈕。', s: 'Photoshop / SAI' },
-            { id: 7, title: '其他創作', bT: '同人作品相關', d: '私下繪製或私人接案的同人作品。', s: 'Photoshop / SAI' },
-            { id: 8, title: '自製小遊戲網站', bT: '自製家族旅遊回憶網頁', d: '與AI搭配嘗試製作網頁&小遊戲。', s: 'AI / html / css / python' },
-            { id: 9, title: '使用AI協力製作相關', bT: 'AI 工作流優化', d: '開發 AI 輔助小工具以優化美術生產與工作流程。', s: 'AI / html / css / python' }
-            
-        ];
+                <p style="margin-top:25px; border-left:3px solid #7d5e53; padding-left:15px;">
+                    <strong>13+ 年遊戲產業經驗</strong><br>
+                    曾任職於 <strong>X-LEGEND 傳奇網路 (6年)</strong> 與 <strong>DaYuan Software (7年)</strong>。參與過多款已上線之手遊、網遊專案開發，熟悉從零到專案完成的視覺建構與製程優化。
+                </p>
 
-document.write(works.map(w => `
-    <div class="gallery-item item-${w.id}">
-        <div class="flip-card">
-            <div class="line"></div>
-            <div class="flip-card-inner">
-                <div class="frame flip-front">
-                    <div class="image-box"><img src="assets/img/thumb/p${w.id}_00.webp" alt="${w.title}"></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;">
+                    <div>
+                        <small style="color:#7d5e53; font-weight:bold; display:block; margin-bottom:8px;">ART &amp; ANIMATION</small>
+                        <ul style="margin:0; padding-left:18px; color:#bcaaa4; font-size:0.85rem; line-height:1.6;">
+                            <li>2D 視覺風格定調 / 角色設定</li>
+                            <li>UI 介面設計 / 排版、裁切</li>
+                            <li>Spine 2D 骨架動畫 / 過場演出</li>
+                            <li>引擎內簡易粒子 / 過場演出</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <small style="color:#7d5e53; font-weight:bold; display:block; margin-bottom:8px;">TECHNICAL &amp; FLOW</small>
+                        <ul style="margin:0; padding-left:18px; color:#bcaaa4; font-size:0.85rem; line-height:1.6;">
+                            <li>Unity / Cocos 引擎美術整合</li>
+                            <li>Python 流程自動化 / AI 使用</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="frame flip-back">
-                    <div class="back-content">
-                        <h3>${w.bT}</h3>
-                        <p>${w.d}</p>
-                        <small style="color:#b7a39a; font-weight:bold;">${w.s}</small>
-                        </div>
+
+                <p style="margin-top:25px; font-size:0.9rem;">
+                    具備多款遊戲製作經驗：從視覺風格發想、草圖完稿、UI 排版設計到 Spine 動態演出、粒子表演；並能獨立完成素材命名統整、裁切優化，直至導入 <strong>Unity/Cocos 引擎</strong> 與前端對接。
+                </p>
+
+                <div style="margin:30px 0; text-align:center; opacity:0.3;">
+                    <span style="color:#7d5e53; letter-spacing:5px;">————— ✠ —————</span>
+                </div>
+
+                <div style="margin-top:40px; border-top:1px solid #4a3b35; padding-top:30px; text-align:center;">
+                    <a href="mailto:dolores0715@gmail.com" class="contact-cta">
+                        <span style="font-size:0.75rem; opacity:0.8; display:block; margin-bottom:6px; letter-spacing:2px;">歡迎合作、委託來信</span>
+                        <span style="display:flex; align-items:center; justify-content:center; gap:10px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                            dolores0715@gmail.com
+                        </span>
+                    </a>
+                    <p style="color:#6d5d57; font-size:0.78rem; margin-top:25px; line-height:1.6; letter-spacing:0.05em;">
+                        遊戲美術委託 / 遠端長期合作
+                    </p>
                 </div>
             </div>
-            <button class="enter-btn-fixed" data-id="${w.id}">ENTER</button>
         </div>
-        <div class="item-title">${w.title}</div> 
     </div>
-`).join(''));
+</div>
 
+<div id="spotlight" aria-hidden="true"></div>
+<div class="ambient-particles" aria-hidden="true"></div>
 
-
-
-// 手機陀螺儀互動：讓畫框隨重力微晃
-if (window.DeviceOrientationEvent) {
-    window.addEventListener('deviceorientation', (event) => {
-        const tiltX = Math.round(event.gamma); // 左右傾斜
-        const cards = document.querySelectorAll('.flip-card');
-        
-        cards.forEach(card => {
-            // 限制最大傾斜角度，避免過度晃動
-            const offset = tiltX * 0.15; 
-            card.style.transform = `rotate(calc(var(--rot) + ${offset}deg))`;
-        });
-    });
-}
-
-
-
-    </script>
-</main>
 
 <script>
+/* DATA */
+const WORKS = [
+    { id: 1,  title: '前端美術界面整合',   bT: '前端美術整合',      d: '負責各美術物件導入引擎、建立分頁prefab檔、檢查引擎美術資源優化。',  s: 'Unity / Cocos / CSS'      },
+    { id: 2,  title: '角色&場物設計',      bT: '視覺形象開發',      d: '各風格角色設計與場景物件設定',                                     s: 'Photoshop / SAI'          },
+    { id: 3,  title: '專案規劃(主美術)',   bT: '主美術管理',        d: '帶領美術團隊，控管專案視覺品質與時程。',                           s: 'Management / Design'      },
+    { id: 4,  title: 'SPINE相關',          bT: '2D 骨架動畫',       d: '人物動態、Icon動畫、角色戰鬥動作與過場演出。',                     s: 'Spine 2D / Animation'     },
+    { id: 5,  title: '粒子動態等',         bT: '特效資源管理',      d: '粒子系統優化與各類環境特效製作。',                                 s: 'Unity Particle / FX'      },
+    { id: 6,  title: 'UI設計及參與專案',   bT: '專案UI及按鈕設計',  d: '依據專案風格創作繪製UI及按鈕。',                                  s: 'Photoshop / SAI'          },
+    { id: 7,  title: '其他創作',           bT: '同人作品相關',      d: '私下繪製或私人接案的同人作品。',                                   s: 'Photoshop / SAI'          },
+    { id: 8,  title: '自製小遊戲網站',     bT: '自製家族旅遊回憶網頁', d: '與AI搭配嘗試製作網頁&小遊戲。',                               s: 'AI / html / css / python' },
+    { id: 9,  title: '使用AI協力製作相關', bT: 'AI 工作流優化',     d: '開發 AI 輔助小工具以優化美術生產與工作流程。',                    s: 'AI / html / css / python' },
+];
 
-function toggleDebugMode() {
-    const isChecked = document.getElementById('debugToggle').checked;
-    if (isChecked) {
-        document.body.classList.add('debug-mode');
-    } else {
-        document.body.classList.remove('debug-mode');
-    }
-}
+/* GALLERY RENDERING */
+(function renderGallery() {
+    const gallery  = document.getElementById('gallery');
+    const fragment = document.createDocumentFragment();
 
-const modal = document.getElementById('aboutModal');
+    WORKS.forEach((w, i) => {
+        const item = document.createElement('div');
+        item.className = `gallery-item item-${w.id}`;
+        item.style.setProperty('--drop-delay', `${(i * 0.08).toFixed(2)}s`);
 
-// --- 彈窗邏輯 ---
-function openAboutModal() {
-    const modalElement = document.getElementById('aboutModal');
-    if (modalElement) {
+        item.innerHTML = `
+            <div class="flip-card">
+                <svg class="rope-svg" viewBox="0 0 20 66" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="rope-pin" cx="10" cy="4" r="4"/>
+                    <path class="rope-line" d="M10,7 C10,7 10,66 10,66"/>
+                </svg>
+                <div class="flip-card-inner">
+                    <div class="frame flip-front">
+                        <div class="image-box">
+                            <img src="assets/img/thumb/p${w.id}_00.webp" alt="${w.title}" loading="lazy">
+                        </div>
+                    </div>
+                    <div class="frame flip-back">
+                        <div class="back-content">
+                            <h3>${w.bT}</h3>
+                            <p>${w.d}</p>
+                            <small class="tech-tags">${w.s}</small>
+                        </div>
+                    </div>
+                </div>
+                <button class="enter-btn-fixed" data-id="${w.id}">ENTER</button>
+            </div>
+            <div class="item-title">${w.title}</div>
+        `;
+        fragment.appendChild(item);
+    });
+
+    gallery.appendChild(fragment);
+})();
+
+
+/* MODAL */
+const Modal = {
+    el: document.getElementById('aboutModal'),
+    open() {
         const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
         document.body.style.paddingRight = scrollBarWidth + 'px';
         document.body.style.overflow = 'hidden';
-        
-        // 保險做法：先顯示遮罩，延遲 10ms 再啟動內部動畫類別
-        modalElement.style.display = 'flex'; 
-        setTimeout(() => {
-            modalElement.classList.add('active');
-        }, 10);
+        this.el.style.display = 'flex';
+        requestAnimationFrame(() => requestAnimationFrame(() => this.el.classList.add('active')));
+    },
+    close() {
+        this.el.classList.remove('active');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
     }
-}
+};
 
-function closeAboutModal() {
-    const modalElement = document.getElementById('aboutModal');
-    if (modalElement) {
-        modalElement.classList.remove('active');
-        document.body.style.overflow = 'auto';
-        document.body.style.paddingRight = '0px';
-    }
-}
-
-// 點擊遮罩區域也可關閉
-window.addEventListener('click', function(event) {
-    const modalElement = document.getElementById('aboutModal');
-    if (event.target === modalElement) closeAboutModal();
+document.getElementById('aboutMeBtn').addEventListener('click', () => Modal.open());
+document.getElementById('closeModal').addEventListener('click', () => Modal.close());
+document.getElementById('aboutModal').addEventListener('click', function(e) {
+    if (e.target === this) Modal.close();
 });
 
-// --- 核心修正：改用「事件委託」處理動態產生的畫框 ---
-document.addEventListener('click', function(e) {
-// 處理 ENTER 按鈕點擊：實裝「走進畫中」效果
-// 尋找 document.addEventListener('click', function(e) { ... } 內的 enter-btn-fixed 邏輯
-if (e.target.classList.contains('enter-btn-fixed')) {
 
-    e.stopPropagation();
+/* GALLERY INTERACTIONS */
+document.getElementById('gallery').addEventListener('click', function(e) {
 
-    const wId = e.target.getAttribute('data-id');
-    const card = e.target.closest('.flip-card');
+    const enterBtn = e.target.closest('.enter-btn-fixed');
+    if (enterBtn) {
+        e.stopPropagation();
+        const wId  = enterBtn.dataset.id;
+        const card = enterBtn.closest('.flip-card');
 
-       document.body.style.pointerEvents = "none";
-    card.classList.add('entering');
-
-    // --- 核心優化設定 ---
-    // 讓 transform 持續 0.8s，但 opacity 在 0.4s 內就消失 (造成消逝感)
-
-card.style.transition = "transform 3s ease-out, " +
-                        "opacity 2s ease-out, " +
-                        "filter 0.2s ease-out";
-
-    // 執行動作：稍微放大 (1.5倍) + 快速變透明
-    card.style.transform = "rotateY(180deg) scale(1.4) scaleX(-1)";
-    card.style.filter = "blur(10px)"; // 稍微加深模糊，遮蓋鋸齒
-    card.style.opacity = "0";
-
-    // 同步讓背景（牆面）霧化
-    setTimeout(() => {
-
-        // 讓牆面更有「藝廊白」的過渡感
-        document.body.style.transition = "all 0.6s ease-in-out";
-        document.body.style.backgroundColor = "#ffffff"; // 往純白過渡
-        document.body.style.filter = "blur(10px)";
-        document.body.style.opacity = "0";
-
-
+        document.body.style.pointerEvents = 'none';
+        card.classList.add('entering');
+        card.style.transition = "transform 3s ease-out, opacity 2s ease-out, filter 0.2s ease-out";
+        card.style.transform  = "rotateY(180deg) scale(1.4) scaleX(-1)";
+        card.style.filter     = "blur(10px)";
+        card.style.opacity    = "0";
 
         setTimeout(() => {
-            window.location.href = `projects/project-${wId}.html`;
-        }, 300);
-    }, 50);
-    return;
+            document.body.style.transition      = "all 0.6s ease-in-out";
+            document.body.style.backgroundColor = "#ffffff";
+            document.body.style.filter          = "blur(10px)";
+            document.body.style.opacity         = "0";
+            setTimeout(() => { window.location.href = `projects/project-${wId}.html`; }, 300);
+        }, 50);
+        return;
+    }
 
-}
+    const flipCard = e.target.closest('.flip-card');
+    if (!flipCard) return;
 
-// 2. 處理畫框翻轉
-const flipCard = e.target.closest('.flip-card');
-if (flipCard) {
     if (!flipCard.classList.contains('is-flipped')) {
         flipCard.classList.remove('flipping-back');
-        void flipCard.offsetWidth; // 關鍵：觸發 reflow 讓瀏覽器重新偵測動畫啟動
+        void flipCard.offsetWidth;
         flipCard.classList.add('is-flipped');
     } else {
         flipCard.classList.remove('is-flipped');
-        void flipCard.offsetWidth; // 觸發 reflow
+        void flipCard.offsetWidth;
         flipCard.classList.add('flipping-back');
-        
-        setTimeout(() => {
-            flipCard.classList.remove('flipping-back');
-        }, 600);
+        setTimeout(() => flipCard.classList.remove('flipping-back'), 600);
     }
-}
 });
 
-/* --- 解決瀏覽器「上一頁」快取導致頁面消失的問題 --- */
-window.addEventListener('pageshow', function(event) {
-    // 如果是從快取（Cache）讀取頁面（即按了上一頁/下一頁）
-    if (event.persisted) {
-        // 1. 強制讓 body 恢復可見與可點擊
-        const b = document.body;
-        b.style.transition = "none";
-        b.style.opacity = "1";
-        b.style.filter = "none";
-        b.style.backgroundColor = "#f8f8f6"; // 恢復妳原本的牆面色
-        b.style.pointerEvents = "auto";
 
-        // 2. 找到所有正在「進入動畫」的畫框並重置
-        document.querySelectorAll('.flip-card').forEach(card => {
-            card.classList.remove('entering');
-            card.style.opacity = "1";
-            card.style.transform = ""; // 恢復 CSS 預設的旋轉值
-            card.style.filter = "none";
+/* SPOTLIGHT */
+const spotlightEl = document.getElementById('spotlight');
+let rafSpotlight = null;
+
+document.addEventListener('mousemove', (e) => {
+    if (rafSpotlight) return;
+    rafSpotlight = requestAnimationFrame(() => {
+        const px = (e.clientX / window.innerWidth  * 100).toFixed(1) + '%';
+        const py = (e.clientY / window.innerHeight * 100).toFixed(1) + '%';
+        spotlightEl.style.background = `radial-gradient(circle 380px at ${px} ${py}, rgba(255,248,235,0.18) 0%, rgba(255,245,225,0.06) 45%, transparent 70%)`;
+        rafSpotlight = null;
+
+        const cards = document.querySelectorAll('.flip-card');
+        const nearMap = new Map();
+        let anyNear = false;
+        cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const near = Math.hypot(e.clientX - (rect.left + rect.width/2), e.clientY - (rect.top + rect.height/2)) < 220;
+            nearMap.set(card, near);
+            if (near) anyNear = true;
         });
-        
-        // 3. 確保轉場動畫之後可以重新被觸發
-        console.log("Page restored from BFCache.");
-    }
+        cards.forEach(card => {
+            const near = nearMap.get(card);
+            card.classList.toggle('spotlight-near', near);
+            const item = card.closest('.gallery-item');
+            if (item) item.classList.toggle('spotlight-dim', anyNear && !near);
+        });
+    });
 });
 
 
+/* ROPE PHYSICS */
+function setRopeCurve(card, state) {
+    const path = card.querySelector('.rope-line');
+    if (!path) return;
+    const d = {
+        rest:      'M10,7 C10,25 10,45 10,66',
+        flipped:   'M10,7 C16,22 14,44 10,66',
+        returning: 'M10,7 C4,22 6,44 10,66',
+    }[state] || 'M10,7 C10,25 10,45 10,66';
+    path.setAttribute('d', d);
+}
+
+const ropeObserver = new MutationObserver((mutations) => {
+    mutations.forEach(m => {
+        if (m.attributeName !== 'class') return;
+        const card = m.target;
+        if      (card.classList.contains('is-flipped'))    setRopeCurve(card, 'flipped');
+        else if (card.classList.contains('flipping-back')) { setRopeCurve(card, 'returning'); setTimeout(() => setRopeCurve(card, 'rest'), 400); }
+        else    setRopeCurve(card, 'rest');
+    });
+});
+document.querySelectorAll('.flip-card').forEach(card => ropeObserver.observe(card, { attributes: true }));
+
+
+/* DEBUG TOGGLE */
+document.getElementById('debugToggle').addEventListener('change', function() {
+    document.body.classList.toggle('debug-mode', this.checked);
+});
+
+
+/* DARK MODE */
+const themeBtn = document.getElementById('themeToggle');
+
+function applyTheme(dark) {
+    document.body.classList.toggle('dark', dark);
+    // Use unicode to avoid encoding issues
+    themeBtn.innerHTML = dark ? '&#x2600;&#xFE0F;' : '&#x1F319;';
+    themeBtn.setAttribute('aria-label', dark ? '\u5207\u63DB\u65E5\u9593\u6A21\u5F0F' : '\u5207\u63DB\u593C\u9593\u6A21\u5F0F');
+}
+
+applyTheme(localStorage.getItem('dolores-theme') === 'dark');
+
+themeBtn.addEventListener('click', () => {
+    const isDark = !document.body.classList.contains('dark');
+    applyTheme(isDark);
+    localStorage.setItem('dolores-theme', isDark ? 'dark' : 'light');
+});
+
+
+/* DEVICE ORIENTATION */
+function handleOrientation(event) {
+    const tiltX = Math.round(event.gamma) * 0.15;
+    document.querySelectorAll('.flip-card').forEach(card => {
+        card.style.transform = `rotate(calc(var(--rot) + ${tiltX}deg))`;
+    });
+}
+if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', handleOrientation);
+}
+
+
+/* BF CACHE RECOVERY */
+window.addEventListener('pageshow', function(event) {
+    if (!event.persisted) return;
+    const b = document.body;
+    b.style.transition      = 'none';
+    b.style.opacity         = '1';
+    b.style.filter          = 'none';
+    b.style.backgroundColor = '#f8f8f6';
+    b.style.pointerEvents   = 'auto';
+    const iris = document.getElementById('iris-overlay');
+    if (iris) iris.remove();
+    document.querySelectorAll('.flip-card').forEach(card => {
+        card.classList.remove('entering');
+        card.style.cssText = '';
+    });
+});
 </script>
-
-<div class="modal-overlay" id="aboutModal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeAboutModal()">&times;</span>
-        <div class="modal-inner">
-            <h2 style="margin-top: 0;">ABOUT ME</h2>
-<div class="modal-body">
-    <p style="margin-bottom: 5px;">
-        <span class="typewriter-effect" style="color: #fff; font-size: 1.3rem; letter-spacing: 0.1em; font-weight: bold;">Dolores</span>
-    </p>
-    <p style="color: #a68b7c; font-weight: bold; margin-top: 0; font-size: 0.9rem;">
-        Senior 2D Artist / Lead Artist <br>
-        <span style="color: #7d5e53; font-size: 0.8rem; font-weight: normal;">Logic-Driven Creativity & Pipeline Optimization</span>
-    </p>
-    
-    <p style="margin-top: 25px; border-left: 3px solid #7d5e53; padding-left: 15px;">
-        <strong>13+ 年遊戲產業經驗</strong><br>
-        曾任職於 <strong>X-LEGEND 傳奇網路 (6年)</strong> 與 <strong>DaYuan Software (7年)</strong>。參與過多款已上線之手遊、網遊專案開發，熟悉從零到專案完成的視覺建構與製程優化。
-    </p>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
-        <div>
-            <small style="color: #7d5e53; font-weight: bold; display: block; margin-bottom: 8px;">ART & ANIMATION</small>
-            <ul style="margin: 0; padding-left: 18px; color: #bcaaa4; font-size: 0.85rem; line-height: 1.6;">
-                <li>2D 視覺風格定調 / 角色設定</li>
-                <li>UI 介面設計 / 排版、裁切</li>
-                <li>Spine 2D 骨架動畫 / 過場演出</li>
-                <li>引擎內簡易粒子 / 過場演出</li>
-            </ul>
-        </div>
-        <div>
-            <small style="color: #7d5e53; font-weight: bold; display: block; margin-bottom: 8px;">TECHNICAL & FLOW</small>
-            <ul style="margin: 0; padding-left: 18px; color: #bcaaa4; font-size: 0.85rem; line-height: 1.6;">
-                <li>Unity / Cocos 引擎美術整合</li>
-               
-                <li>Python 流程自動化 / AI 使用</li>
-            </ul>
-        </div>
-    </div>
-
-    <p style="margin-top: 25px; font-size: 0.9rem;">
-        具備多款遊戲製作經驗：從視覺風格發想、草圖完稿、UI 排版設計到 Spine 動態演出、粒子表演；並能獨立完成素材命名統整、裁切優化，直至導入 <strong>Unity/Cocos 引擎</strong> 與前端對接。
-    </p>
-
-<div style="margin: 30px 0; text-align: center; opacity: 0.3;">
-    <span style="color: #7d5e53; letter-spacing: 5px;">————— ✠ —————</span>
-</div>
-
-<div style="margin-top: 40px; border-top: 1px solid #4a3b35; padding-top: 30px; text-align: center;">
-    <a href="mailto:dolores0715@gmail.com" class="contact-cta">
-        <span style="font-size: 0.75rem; opacity: 0.8; display: block; margin-bottom: 6px; letter-spacing: 2px;">歡迎合作、委託來信</span>
-        <span style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-            dolores0715@gmail.com
-        </span>
-    </a>
-
-    <p style="color: #6d5d57; font-size: 0.78rem; margin-top: 25px; line-height: 1.6; letter-spacing: 0.05em;">
-        遊戲美術委託 / 遠端長期合作<br>
-    
-        
-    </p>
-</div>
-</div>
-        </div>
-    </div>
-</div>
-
-<div class="ambient-particles"></div>
-
-
 
 </body>
 </html>
