@@ -499,6 +499,33 @@ body {
 .bottom-nav-btns .nav-hint {
     font-size: 10px;
 }
+
+.game-wrapper {
+    position: relative;
+    width: 33%;
+    margin: 0 auto;
+    overflow: hidden;
+    /* 預設先給一個高度，JS 會動態覆蓋 */
+    height: 600px;
+}
+
+.game-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 390px;
+    height: 844px;
+    border: none;
+    transform-origin: top left;
+}
+
+/* 手機版：占版面 90% */
+@media (max-width: 768px) {
+    .game-wrapper {
+        width: 90%;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -537,58 +564,26 @@ body {
 
 <section class="detail-block-full">
     <div class="full-text-left p">
-        <p>▼ AI輔助出圖>AI生成動態製作>後製調整</p>
-    </div>
-    
-    <div class="split-container">
-        <div class="split-item" style="flex: 1;">
-            <video src="../videos/p9_01.webm" autoplay loop muted playsinline></video>
-            <div class="split-caption">
-            
-            </div>
-        </div>
-
-        <div class="split-item" style="flex: 1;">
-            <video src="../videos/p9_02.webm" autoplay loop muted playsinline></video>
-            <div class="split-caption">
-
-            </div>
-        </div>
-
-        <div class="split-item" style="flex: 1;">
-            <video src="../videos/p6_02.webm" autoplay loop muted playsinline></video>
-            <div class="split-caption">
-
-            </div>
-        </div>
-    </div>
-</section>
-
-
-
-<section class="detail-block-full">
-    <div class="full-text-left p">
-        <p>▼ Cocos內圖字裁切小工具製作</p>
+        <p>▼ 在這裡直接試玩！</p>
     </div>
 
-    <div class="full-image-frame">
-        <img src="../assets/gallery/p9_01.webp" alt="圖字裁切小工具">
+    <div class="full-image-frame" style="padding: 0; overflow: hidden; background: #000;">
         
-        <p class="inner-caption">嘗試製作裁切圖字輸出.json檔工具，方便其他美術成員們製作圖字導入引擎</p>
+        <!-- 外層：撐起等比高度用 -->
+        <div class="game-wrapper">
+            <iframe 
+                id="game-iframe"
+                src="https://dv0715.github.io/2048/" 
+                class="game-frame"
+                title="金門2048小遊戲"
+                scrolling="no">
+            </iframe>
+        </div>
+
     </div>
+    <p class="inner-caption" style="margin-top:12px;">以金門在地元素重新詮釋2048經典玩法，支援鍵盤方向鍵及手機滑動操作</p>
 </section>
 
-<section class="detail-block-full">
-    <div class="full-text-left p">
-        <p>▼ 圖集製作小工具</p>
-    </div>
-
-    <div class="full-image-frame">
-        <img src="../assets/gallery/p9_02.webp" alt="圖字裁切小工具">
-        
-        <p class="inner-caption">圖集製作簡易版工具，方便自用</p>
-    </div>
-</section>
 <div class="bottom-nav-container">
     <div class="footer-line"></div> <div class="bottom-nav-btns">
         <a href="../projects/project-8.html" class="nav-arrow-btn prev">
@@ -649,6 +644,23 @@ window.addEventListener('load', () => {
         document.body.style.overflow = 'hidden'; 
     }
 });
+
+function scaleGameIframe() {
+    const wrapper = document.querySelector('.game-wrapper');
+    const frame = document.getElementById('game-iframe');
+    if (!wrapper || !frame) return;
+
+    const wrapperWidth = wrapper.offsetWidth;
+    const scale = wrapperWidth / 390;
+
+    frame.style.transform = `scale(${scale})`;
+    wrapper.style.height = (844 * scale) + 'px';
+    // 注意這裡改用 height 而不是 paddingTop，更直覺
+}
+
+scaleGameIframe();
+window.addEventListener('resize', scaleGameIframe);
+
 
 // 關閉邏輯要放在外面（因為 HTML 裡的 onclick="closeLightbox()" 會去全域找這個 function）
 function closeLightbox() {
