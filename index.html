@@ -948,7 +948,7 @@ function applyTheme(dark) {
     themeBtn.innerHTML = dark ? '&#x2600;&#xFE0F;' : '&#x1F319;';
     themeBtn.setAttribute('aria-label', dark ? '\u5207\u63DB\u65E5\u9593\u6A21\u5F0F' : '\u5207\u63DB\u5938\u9593\u6A21\u5F0F');
 }
-applyTheme(localStorage.getItem('dolores-theme')==='dark');
+applyTheme(localStorage.getItem('dolores-theme') !== 'light');
 themeBtn.addEventListener('click', () => {
     const d = !document.body.classList.contains('dark');
     applyTheme(d); localStorage.setItem('dolores-theme', d?'dark':'light');
@@ -968,7 +968,7 @@ window.addEventListener('pageshow', function(e) {
     if(!e.persisted) return;
     const b=document.body;
     b.style.transition='none'; b.style.opacity='1'; b.style.filter='none';
-    b.style.backgroundColor='#f8f8f6'; b.style.pointerEvents='auto';
+    b.style.backgroundColor='#16110e'; b.style.pointerEvents='auto';
     const iris=document.getElementById('iris-overlay'); if(iris) iris.remove();
     document.querySelectorAll('.flip-card').forEach(c=>{c.classList.remove('entering');c.style.cssText='';});
 });
