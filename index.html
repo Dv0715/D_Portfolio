@@ -985,5 +985,157 @@ window.addEventListener('pageshow', function(e) {
 });
 </script>
 
+
+<!-- ── GUARD PATROL ──────────────────────────────────────── -->
+<canvas id="guard-light" style="position:fixed;inset:0;pointer-events:none;z-index:10;mix-blend-mode:screen;"></canvas>
+<div id="guard-el" style="position:fixed;bottom:0;width:560px;height:720px;pointer-events:none;filter:blur(2.5px);opacity:0;z-index:11;will-change:transform,opacity;">
+    <img src="assets/Police.webp" style="width:100%;height:100%;object-fit:contain;display:block;">
+</div>
+
+<script>
+(function initGuard() {
+    const guardEl  = document.getElementById('guard-el');
+    const glCanvas = document.getElementById('guard-light');
+    const glCtx    = glCanvas.getContext('2d');
+    let patrolActive = false;
+    let rafId = null;
+
+    const GW = 560, GH = 720; // 警衛顯示尺寸
+
+    function resize() {
+        glCanvas.width  = window.innerWidth;
+        glCanvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function drawLight(gx, gy, angle, intensity, scanT) {
+        glCtx.clearRect(0, 0, glCanvas.width, glCanvas.height);
+        if (intensity <= 0) return;
+
+        // 手電筒位置對應放大後的手臂位置（viewBox 32,34 → 等比例換算）
+        const scaleX = GW / 44, scaleY = GH / 88;
+        const tx = gx + 42 * scaleX;
+        const ty = gy + 56 * scaleY;
+        const len = 900; // 光錐長度也跟著放大
+        const spread = 0.32 + Math.sin(scanT) * 0.04;
+
+        const grad = glCtx.createRadialGradient(tx, ty, 0, tx, ty, len);
+        grad.addColorStop(0,    `rgba(255,235,130,${0.48 * intensity})`);
+        grad.addColorStop(0.15, `rgba(255,220,90,${0.22 * intensity})`);
+        grad.addColorStop(0.5,  `rgba(255,205,60,${0.08 * intensity})`);
+        grad.addColorStop(1,    'rgba(255,190,40,0)');
+
+        glCtx.save();
+        glCtx.translate(tx, ty);
+        glCtx.rotate(angle);
+        glCtx.beginPath();
+        glCtx.moveTo(0, 0);
+        glCtx.arc(0, 0, len, -spread, spread);
+        glCtx.closePath();
+        glCtx.fillStyle = grad;
+        glCtx.fill();
+        glCtx.restore();
+
+        // 手電筒燈頭光暈
+        const glow = glCtx.createRadialGradient(tx, ty, 0, tx, ty, 60);
+        glow.addColorStop(0, `rgba(255,235,130,${0.9 * intensity})`);
+        glow.addColorStop(1, 'rgba(255,200,50,0)');
+        glCtx.beginPath();
+        glCtx.arc(tx, ty, 60, 0, Math.PI * 2);
+        glCtx.fillStyle = glow;
+        glCtx.fill();
+    }
+
+    function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+
+    function patrol() {
+        if (patrolActive) return;
+        patrolActive = true;
+
+        const W = window.innerWidth;
+        const fromRight = Math.random() < 0.5;
+        const startX  = fromRight ? W + 20   : -GW - 20;
+        const endX    = fromRight ? -GW - 20  : W + 20;
+        const pauseX  = W * (0.2 + Math.random() * 0.6);
+        // 讓腳底貼近畫面底部，感覺像在地板上走
+        const guardY  = window.innerHeight - GH * 0.68;
+        const torchAng = fromRight ? Math.PI : 0;
+
+        const phases = [
+            { name:'in',    dur: 3500 },
+            { name:'pause', dur: 3200 },
+            { name:'out',   dur: 3500 },
+            { name:'fade',  dur: 600  },
+        ];
+        let pi = 0, phaseStart = null, scanT = 0, lastTs = null;
+
+        guardEl.style.opacity   = '0.01';
+        
+        guardEl.style.transform = fromRight ? 'scaleX(-1)' : 'scaleX(1)';
+        guardEl.style.left      = startX + 'px';
+        guardEl.style.top       = guardY + 'px';
+
+        function tick(ts) {
+            if (!lastTs) lastTs = ts;
+            const dt = ts - lastTs; lastTs = ts;
+            if (!phaseStart) phaseStart = ts;
+            scanT += dt * 0.0016;
+
+            const phase = phases[pi];
+            const prog  = Math.min((ts - phaseStart) / phase.dur, 1);
+            const ep    = ease(prog);
+
+            if (phase.name === 'in') {
+                const gx   = startX + (pauseX - startX) * ep;
+                const step = Math.sin(ts * 0.008) * 4; // 走路上下晃動
+                guardEl.style.left    = gx + 'px';
+                guardEl.style.opacity = String(Math.min(prog * 5, 0.3) * (1 - prog * 0.3));
+                guardEl.style.transform = (fromRight ? 'scaleX(-1)' : 'scaleX(1)') + ` translateY(${step}px)`;
+                drawLight(gx, guardY, torchAng, Math.min(prog * 3, 1), scanT);
+            }
+            else if (phase.name === 'pause') {
+                const scanOff = Math.sin(scanT) * 0.22;
+                guardEl.style.left      = pauseX + 'px';
+                guardEl.style.transform = fromRight ? 'scaleX(-1)' : 'scaleX(1)';
+                drawLight(pauseX, guardY, torchAng + scanOff, 1, scanT);
+            }
+            else if (phase.name === 'out') {
+                const gx   = pauseX + (endX - pauseX) * ep;
+                const step = Math.sin(ts * 0.008) * 4;
+                guardEl.style.left    = gx + 'px';
+                guardEl.style.transform = (fromRight ? 'scaleX(-1)' : 'scaleX(1)') + ` translateY(${step}px)`;
+                drawLight(gx, guardY, torchAng, 1 - prog * 0.3, scanT);
+            }
+            else if (phase.name === 'fade') {
+                guardEl.style.opacity = String(0.5 * (1 - prog));
+                drawLight(parseFloat(guardEl.style.left), guardY, torchAng, (1 - prog) * 0.65, scanT);
+            }
+
+            if (prog >= 1) {
+                pi++; phaseStart = ts;
+                if (pi >= phases.length) {
+                    guardEl.style.opacity = '0';
+                    glCtx.clearRect(0, 0, glCanvas.width, glCanvas.height);
+                    patrolActive = false;
+                    scheduleNext();
+                    return;
+                }
+            }
+            rafId = requestAnimationFrame(tick);
+        }
+        rafId = requestAnimationFrame(tick);
+    }
+
+    function scheduleNext() {
+        const delay = 25000 + Math.random() * 35000;
+        setTimeout(() => { if (!patrolActive) patrol(); }, delay);
+    }
+
+    setTimeout(patrol, 8000 + Math.random() * 7000);
+})();
+</script>
+
+
 </body>
 </html>
