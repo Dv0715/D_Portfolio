@@ -196,10 +196,11 @@ body::before {
     position: absolute; inset: 0;
     backface-visibility: hidden; -webkit-backface-visibility: hidden;
     display: flex; flex-direction: column;
-    transition: background-color .4s ease, border-color .4s ease;
+        transition: background-color .4s ease, border-color .4s ease,
+                box-shadow .3s ease, filter .3s ease;
 }
 .image-box { background: #eee; overflow: hidden; width: 100%; height: 100%; position: relative; transform: translateZ(0); box-shadow: 0 0 5px rgba(0,0,0,.1); }
-.image-box img { width: 100%; height: 100%; object-fit: cover; display: block; position: relative; z-index: 1; }
+.image-box img { width: 100%; height: 100%; object-fit: cover; display: block; position: relative; z-index: 1; transition: filter .3s ease;}
 .flip-back { transform: rotateY(180deg) translateZ(1px); background-color: #fff9f5; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 .flip-card.is-flipped:hover .flip-back { border-color: var(--color-brown-mid); box-shadow: 0 0 20px rgba(255,255,255,.4), inset 0 0 10px rgba(255,255,255,.2); transition: all .3s ease; }
 
@@ -597,6 +598,418 @@ body.dark .note-years  { background:rgba(240,200,100,.15); color:#d4b060; border
     </style>
 </head>
 <body>
+
+
+    
+
+<!-- ── INTRO SEQUENCE ──────────────────────────────────── -->
+<style>
+
+#intro-text-bg {
+    padding: 40px 60px 36px;
+    background: radial-gradient(ellipse 100% 100% at 50% 50%,
+        rgba(0,0,0,.72) 0%,
+        rgba(0,0,0,.45) 60%,
+        transparent 100%);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+#intro-stage {
+    position: fixed; inset: 0; z-index: 999999;
+    background: #0a0704;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: all; overflow: hidden;
+}
+#intro-text-wrap {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 2; pointer-events: none;
+}
+.intro-line-1 {
+    font-family: "PingFang TC", serif;
+    font-size: clamp(3rem, 10vw, 8rem);
+    font-weight: 100; letter-spacing: .45em;
+    color: #e8ddd5;
+    text-shadow: 0 0 60px rgba(200,160,80,.3), 0 0 120px rgba(200,140,60,.15);
+    opacity: 0;
+    transform: scale(0.12) translateZ(0);
+    transition: none;
+    will-change: transform, opacity;
+}
+.intro-line-2 {
+    font-family: "PingFang TC", sans-serif;
+    font-size: clamp(.7rem, 1.8vw, 1rem);
+    font-weight: 400; letter-spacing: .32em;
+    color: #a07858;
+    margin-top: 18px;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: none;
+    will-change: transform, opacity;
+}
+.intro-line-3 {
+    font-size: clamp(.55rem, 1.2vw, .75rem);
+    font-weight: 400; letter-spacing: .22em;
+    color: #6a4e38;
+    font-family: "PingFang TC", sans-serif;
+    margin-top: 10px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: none;
+    will-change: transform, opacity;
+}
+.intro-divider {
+    width: 0; height: 1px;
+    background: linear-gradient(to right, transparent, #a07858, transparent);
+    margin: 16px auto 0;
+    opacity: 0;
+    transition: none;
+}
+
+/* 粒子光點 */
+#intro-particles {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: 0;
+    transition: opacity 1s ease;
+}
+
+/* 門 */
+#door-left, #door-right {
+    position: absolute; top: 0; bottom: 0;
+    width: 50%;
+    will-change: transform, opacity;
+    overflow: hidden;
+}
+#door-left  { left: 0;  transform-origin: left center; }
+#door-right { right: 0; transform-origin: right center; }
+
+.door-inner {
+    position: absolute; inset: 0;
+}
+.door-wood {
+    position: absolute; inset: 0;
+    background: linear-gradient(108deg, #1c1208 0%, #2e1e0e 35%, #221408 65%, #181008 100%);
+}
+.door-grain-h {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(93deg,
+        transparent, transparent 42px,
+        rgba(255,255,255,.016) 42px, rgba(255,255,255,.016) 43px);
+}
+.door-grain-v {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(180deg,
+        transparent, transparent 200px,
+        rgba(0,0,0,.08) 200px, rgba(0,0,0,.08) 201px);
+}
+.door-panel {
+    position: absolute;
+    border: 1.5px solid rgba(180,140,60,.16);
+    box-shadow: inset 0 0 24px rgba(0,0,0,.45);
+}
+.door-handle {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 88px;
+    background: linear-gradient(180deg, #d4ac48 0%, #a07828 45%, #d4ac48 100%);
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,.7), inset 1px 1px 2px rgba(255,230,120,.35);
+}
+.door-hinge {
+    position: absolute; width: 13px; height: 44px;
+    background: linear-gradient(90deg, #777, #ccc 40%, #999);
+    border-radius: 3px;
+    box-shadow: 1px 1px 4px rgba(0,0,0,.55);
+}
+.door-crack {
+    position: absolute; top: 0; bottom: 0; width: 0;
+    transition: width .35s ease, background .35s ease;
+}
+#door-left  .door-crack { right: 0; background: linear-gradient(to left,  rgba(255,215,100,0), transparent); }
+#door-right .door-crack { left:  0; background: linear-gradient(to right, rgba(255,215,100,0), transparent); }
+#door-left  .door-handle { right: 13%; }
+#door-right .door-handle { left:  13%; }
+#door-left  .door-hinge { left: 4%; }
+#door-right .door-hinge { right: 4%; }
+</style>
+
+<div id="intro-stage">
+    <canvas id="intro-particles"></canvas>
+
+    <!-- 文字區 -->
+<div id="intro-text-wrap">
+    <div id="intro-text-bg">
+        <div class="intro-line-1" id="iL1">DOLORES</div>
+        <div class="intro-divider" id="iDiv"></div>
+        <div class="intro-line-2" id="iL2">PORTFOLIO EXHIBITION</div>
+        <div class="intro-line-3" id="iL3">資深 2D 美術 ／ 13 年遊戲開發經驗</div>
+    </div>
+</div>
+
+    <!-- 左門 -->
+<div id="door-left">
+    <img src="assets/door.webp" style="width:100%;height:100%;object-fit:cover;object-position:left center;display:block;">
+    <div class="door-crack"></div>
+</div>
+
+    <!-- 右門 -->
+<div id="door-right">
+    <img src="assets/door.webp" style="width:100%;height:100%;object-fit:cover;object-position:right center;display:block;transform:scaleX(-1);">
+    <div class="door-crack" style="left:0;background:linear-gradient(to right,rgba(255,215,100,0),transparent);"></div>
+</div>
+</div>
+
+<script>
+(function initIntro() {
+    const stage  = document.getElementById('intro-stage');
+    const iL1    = document.getElementById('iL1');
+    const iL2    = document.getElementById('iL2');
+    const iL3    = document.getElementById('iL3');
+    const iDiv   = document.getElementById('iDiv');
+    const doorL  = document.getElementById('door-left');
+    const doorR  = document.getElementById('door-right');
+    const pcv    = document.getElementById('intro-particles');
+    const pcx    = pcv.getContext('2d');
+
+    /* ── 粒子初始化 ── */
+    let particles = [];
+    function resizePC() { pcv.width = window.innerWidth; pcv.height = window.innerHeight; }
+    resizePC();
+    window.addEventListener('resize', resizePC);
+
+    for (let i = 0; i < 55; i++) {
+        particles.push({
+            x: Math.random(), y: Math.random(),
+            r: Math.random() * 1.4 + 0.3,
+            a: Math.random() * Math.PI * 2,
+            s: (Math.random() * 0.15 + 0.05) * 0.001,
+            op: Math.random() * 0.5 + 0.1,
+        });
+    }
+    let pcAlpha = 0, pcRaf = null;
+    function drawParticles(ts) {
+        pcx.clearRect(0, 0, pcv.width, pcv.height);
+        particles.forEach(p => {
+            p.a += p.s;
+            const x = (p.x + Math.sin(p.a) * 0.03) * pcv.width;
+            const y = (p.y + Math.cos(p.a * 0.7) * 0.02) * pcv.height;
+            pcx.beginPath();
+            pcx.arc(x, y, p.r, 0, Math.PI * 2);
+            pcx.fillStyle = `rgba(200,160,80,${p.op * pcAlpha})`;
+            pcx.fill();
+        });
+        pcRaf = requestAnimationFrame(drawParticles);
+    }
+    drawParticles();
+
+    /* ── 音效 ── */
+    let _actx = null;
+    function getACtx() { return _actx || (_actx = new (window.AudioContext || window.webkitAudioContext)()); }
+
+    function playWhoosh() {
+        try {
+            const ctx = getACtx();
+            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.6, ctx.sampleRate);
+            const d   = buf.getChannelData(0);
+            for (let i = 0; i < d.length; i++)
+                d[i] = (Math.random()*2-1) * Math.pow(1 - i/d.length, 1.8) * 0.4;
+            const src = ctx.createBufferSource(); src.buffer = buf;
+            const g   = ctx.createGain(); g.gain.setValueAtTime(0.22, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+            const hp  = ctx.createBiquadFilter(); hp.type = 'bandpass'; hp.frequency.value = 900; hp.Q.value = 0.5;
+            src.connect(hp); hp.connect(g); g.connect(ctx.destination); src.start();
+        } catch(e) {}
+    }
+
+function playDoorOpen() {
+    try {
+        const audio = new Audio('Audio/door3.ogg');
+        audio.volume = 0.8;
+        audio.play();
+
+        /* ── 鉸鏈「咿－－壓－－」滑音 ── */
+        const osc = ctx.createOscillator();
+        osc.type = 'sawtooth';
+        // 頻率從 420Hz 滑落到 90Hz，模擬鉸鏈被壓下去的音調變化
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 1.8);
+
+        // 加一點顫抖感（鉸鏈不穩定的抖動）
+        const lfo = ctx.createOscillator();
+        lfo.type = 'sine';
+        lfo.frequency.setValueAtTime(6, now);
+        lfo.frequency.linearRampToValueAtTime(2.5, now + 1.8);
+        const lfoGain = ctx.createGain();
+        lfoGain.gain.setValueAtTime(18, now);
+        lfoGain.gain.linearRampToValueAtTime(6, now + 1.8);
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+
+        // 失真讓聲音更粗糙，不像電子音
+        const dist = ctx.createWaveShaper();
+        const curve = new Float32Array(512);
+        for (let i = 0; i < 512; i++) {
+            const x = (i * 2) / 512 - 1;
+            curve[i] = (Math.PI + 280) * x / (Math.PI + 280 * Math.abs(x));
+        }
+        dist.curve = curve;
+
+        // 帶通濾波，留住鉸鏈的「金屬感」頻段
+        const bp = ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.setValueAtTime(300, now);
+        bp.frequency.exponentialRampToValueAtTime(120, now + 1.8);
+        bp.Q.value = 1.8;
+
+        const oscGain = ctx.createGain();
+        oscGain.gain.setValueAtTime(0.001, now);
+        oscGain.gain.linearRampToValueAtTime(0.28, now + 0.08); // 起音
+        oscGain.gain.setValueAtTime(0.28, now + 0.1);
+        oscGain.gain.linearRampToValueAtTime(0.18, now + 1.2);  // 中段
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 1.9); // 尾音
+
+        osc.connect(dist);
+        dist.connect(bp);
+        bp.connect(oscGain);
+        oscGain.connect(ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 2.0);
+        lfo.start(now);
+        lfo.stop(now + 2.0);
+
+        /* ── 木頭低頻共鳴（門板震動感）── */
+        const woodBuf = ctx.createBuffer(1, ctx.sampleRate * 0.35, ctx.sampleRate);
+        const wd      = woodBuf.getChannelData(0);
+        for (let i = 0; i < wd.length; i++) {
+            wd[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.08)) * 0.9;
+        }
+        const woodSrc  = ctx.createBufferSource(); woodSrc.buffer = woodBuf;
+        const woodLP   = ctx.createBiquadFilter(); woodLP.type = 'lowpass'; woodLP.frequency.value = 95;
+        const woodGain = ctx.createGain(); woodGain.gain.value = 0.55;
+        woodSrc.connect(woodLP); woodLP.connect(woodGain); woodGain.connect(ctx.destination);
+        woodSrc.start(now + 0.05);
+
+        /* ── 門關緊前的最後一聲「叩」── */
+        setTimeout(() => {
+            try {
+                const thudBuf  = ctx.createBuffer(1, ctx.sampleRate * 0.25, ctx.sampleRate);
+                const td       = thudBuf.getChannelData(0);
+                for (let i = 0; i < td.length; i++) {
+                    td[i] = (Math.random()*2-1) * Math.exp(-i/(ctx.sampleRate*0.04)) * 0.7;
+                }
+                const thudSrc  = ctx.createBufferSource(); thudSrc.buffer = thudBuf;
+                const thudLP   = ctx.createBiquadFilter(); thudLP.type = 'lowpass'; thudLP.frequency.value = 80;
+                const thudGain = ctx.createGain(); thudGain.gain.value = 0.6;
+                thudSrc.connect(thudLP); thudLP.connect(thudGain); thudGain.connect(ctx.destination);
+                thudSrc.start();
+            } catch(e) {}
+        }, 1600);
+
+    } catch(e) {}
+}
+
+    /* ── 補間工具 ── */
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function easeOut3(t) { return 1 - Math.pow(1 - t, 3); }
+    function easeInOut(t) { return t < .5 ? 2*t*t : -1+(4-2*t)*t; }
+
+    /* ── 文字飛入動畫（requestAnimationFrame 控制）── */
+    function animText(el, fromScale, toScale, fromOp, toOp, fromY, toY, dur, delay, ease) {
+        setTimeout(() => {
+            const start = performance.now();
+            function frame(now) {
+                const t  = Math.min((now - start) / dur, 1);
+                const et = ease(t);
+                const sc = lerp(fromScale, toScale, et);
+                const op = lerp(fromOp, toOp, et);
+                const ty = lerp(fromY, toY, et);
+                el.style.opacity   = op;
+                el.style.transform = `scale(${sc}) translateY(${ty}px)`;
+                if (t < 1) requestAnimationFrame(frame);
+            }
+            requestAnimationFrame(frame);
+        }, delay);
+    }
+
+    function animWidth(el, fromW, toW, dur, delay) {
+        setTimeout(() => {
+            const start = performance.now();
+            function frame(now) {
+                const t  = Math.min((now - start) / dur, 1);
+                el.style.width   = lerp(fromW, toW, easeOut3(t)) + 'px';
+                el.style.opacity = lerp(0, 1, Math.min(t * 3, 1));
+                if (t < 1) requestAnimationFrame(frame);
+            }
+            requestAnimationFrame(frame);
+        }, delay);
+    }
+
+    /* ── 主序列 ── */
+    // 0ms 開始：粒子淡入
+    setTimeout(() => {
+        let t0 = performance.now();
+        (function fadePC(now) {
+            pcAlpha = Math.min((now - t0) / 1200, 1);
+            if (pcAlpha < 1) requestAnimationFrame(fadePC);
+        })(t0);
+    }, 0);
+
+    // 400ms：DOLORES 從遠處飛近（小→大）
+    setTimeout(() => playWhoosh(), 380);
+    animText(iL1, 0.08, 1, 0, 1, 0, 0, 900, 400, easeOut3);
+
+    // 1200ms：分隔線展開
+    animWidth(iDiv, 0, Math.min(window.innerWidth * 0.28, 320), 700, 1200);
+
+    // 1400ms：副標 1 淡入上移
+    animText(iL2, 1, 1, 0, 1, 18, 0, 600, 1400, easeOut3);
+
+    // 1700ms：副標 2
+    animText(iL3, 1, 1, 0, 1, 12, 0, 600, 1700, easeOut3);
+
+    // 2600ms：文字淡出
+    setTimeout(() => {
+        const tw = document.getElementById('intro-text-wrap');
+        tw.style.transition = 'opacity 0.5s ease';
+        tw.style.opacity = '0';
+    }, 2600);
+
+    // 2800ms：門縫透光
+    setTimeout(() => {
+        stage.querySelectorAll('.door-crack').forEach(c => {
+            c.style.width = '8px';
+            c.style.background = c.style.background.replace('rgba(255,215,100,0)', 'rgba(255,215,100,.6)');
+        });
+    }, 2800);
+
+    // 3100ms：推門聲 + 門開始打開
+    setTimeout(() => {
+        playDoorOpen();
+        doorL.style.transition = 'transform 1.3s cubic-bezier(0.4,0,0.15,1)';
+        doorR.style.transition = 'transform 1.3s cubic-bezier(0.4,0,0.15,1)';
+        doorL.style.transform  = 'perspective(1400px) rotateY(70deg) translateX(-92%)';
+        doorR.style.transform  = 'perspective(1400px) rotateY(-70deg) translateX(92%)';
+    }, 3100);
+
+    // 4200ms：整體淡出移除
+    setTimeout(() => {
+        stage.style.transition = 'opacity 0.4s ease';
+        stage.style.opacity    = '0';
+        stage.style.pointerEvents = 'none';
+        setTimeout(() => {
+            cancelAnimationFrame(pcRaf);
+            stage.remove();
+        }, 420);
+    }, 4200);
+
+})();
+</script>
+
+
 
 <!-- HEADER -->
 <header class="header">
@@ -1065,28 +1478,32 @@ window.addEventListener('pageshow', function(e) {
     }
 
     /* ── 光錐打到畫框 ────────────────────────────────────── */
-    function updateFrameSpotlight(lightX, lightY, fromRight) {
-        const cards = document.querySelectorAll('.flip-card');
-        cards.forEach(card => {
-            const r = card.getBoundingClientRect();
-            const cardCX = r.left + r.width / 2;
-            const cardCY = r.top  + r.height / 2;
-            // 光錐是水平的，只判斷 Y 距離 + X 方向對齊
-            const dy = Math.abs(cardCY - lightY);
-            const dx = fromRight ? (cardCX - lightX) : (lightX - cardCX);
-            const hit = dy < 160 && dx > 0 && dx < 700;
-            card.classList.toggle('spotlight-near', hit);
-            const item = card.closest('.gallery-item');
-            if (item) item.classList.toggle('spotlight-dim', !hit);
-        });
-    }
-    function clearFrameSpotlight() {
-        document.querySelectorAll('.flip-card').forEach(c => {
-            c.classList.remove('spotlight-near');
-            const item = c.closest('.gallery-item');
-            if (item) item.classList.remove('spotlight-dim');
-        });
-    }
+function updateFrameSpotlight(lightX, lightY, fromRight) {
+    const cards = document.querySelectorAll('.flip-card');
+    cards.forEach(card => {
+        const r = card.getBoundingClientRect();
+        const cardCX = r.left + r.width / 2;
+        const cardCY = r.top  + r.height / 2;
+        const dy = Math.abs(cardCY - lightY);
+        const dx = fromRight ? (cardCX - lightX) : (lightX - cardCX);
+        const hit = dy < 160 && dx > 0 && dx < 700;
+
+        card.classList.toggle('spotlight-near', hit);
+        const item = card.closest('.gallery-item');
+        if (item) item.classList.toggle('spotlight-dim', !hit);
+
+        // 被照到時的效果
+        const img   = card.querySelector('.flip-front img');
+        const frame = card.querySelector('.flip-front.frame');
+        if (hit) {
+            if (img)   img.style.filter     = 'brightness(1.25) contrast(1.08) saturate(1.2)';
+            if (frame) frame.style.boxShadow = '8px 12px 20px rgba(0,0,0,.1), inset 0 0 3px rgba(104,104,104,.8), 0 0 35px rgba(255,235,130,.45)';
+        } else {
+            if (img)   img.style.filter     = '';
+            if (frame) frame.style.boxShadow = '';
+        }
+    });
+}
 
     /* ── 畫光錐 ──────────────────────────────────────────── */
     function drawLight(gx, gy, angle, intensity, scanT) {
