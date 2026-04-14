@@ -44,11 +44,10 @@
 body {
     margin: 0; padding: 0;
     background-color: var(--color-bg);
-    background-image:
-        radial-gradient(#e5e5e0 1px, transparent 0),
-        radial-gradient(#e5e5e0 1px, transparent 0);
-    background-size: 30px 30px;
-    background-position: 0 0, 15px 15px;
+    background-image: url('assets/wall_BG.webp');
+    background-size: auto;
+    background-repeat: repeat;
+    background-position: 0 0;
     font-family: "PingFang TC", sans-serif;
     overflow-x: hidden;
     scrollbar-gutter: stable;
@@ -192,7 +191,9 @@ body::before {
 .frame {
     background-color: #fff; padding: 12px 12px 35px;
     border: 10px solid var(--color-dark);
-    box-shadow: 8px 12px 20px rgba(0,0,0,.1), inset 0 0 3px rgba(104,104,104,.8);
+    box-shadow: 0 8px 32px rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.4),
+            inset 0 0 3px rgba(104,104,104,.8),
+            inset 0 1px 0 rgba(255,255,255,.15);
     position: absolute; inset: 0;
     backface-visibility: hidden; -webkit-backface-visibility: hidden;
     display: flex; flex-direction: column;
@@ -551,7 +552,7 @@ body.debug-mode .gallery-item::before {
 
 
 /* ─── 17. Dark Mode ─────────────────────────────────────── */
-body.dark { --color-bg:#16110e; --color-dark:#8a7060; --color-brown:#c9a882; --color-brown-mid:#a07858; --color-brown-light:#c9a882; --color-rope:#6a5a4e; --color-modal-bg:#1e1612; --color-text-muted:#9e8a7a; background-image:radial-gradient(#221a15 1px,transparent 0),radial-gradient(#221a15 1px,transparent 0); }
+body.dark { --color-bg:#16110e; --color-dark:#8a7060; --color-brown:#c9a882; --color-brown-mid:#a07858; --color-brown-light:#c9a882; --color-rope:#6a5a4e; --color-modal-bg:#1e1612; --color-text-muted:#9e8a7a; background-image:url('assets/wall_BG.webp'); }
 body.dark .header { background-color:#0f0b09; }
 body.dark .header-text h1 { color:#e8ddd5; }
 body.dark .header-text .description { color:#7a6a60; }
