@@ -751,19 +751,27 @@ body.dark .note-years  { background:rgba(240,200,100,.15); color:#d4b060; border
 
     <!-- 左門 -->
 <div id="door-left">
-    <img src="assets/door.webp" style="width:100%;height:100%;object-fit:cover;object-position:left center;display:block;">
+    <img src="assets/door.webp" style="width:100%;height:100%;object-fit:cover;object-position:right center;display:block;">
     <div class="door-crack"></div>
 </div>
 
     <!-- 右門 -->
 <div id="door-right">
-    <img src="assets/door.webp" style="width:100%;height:100%;object-fit:cover;object-position:right center;display:block;transform:scaleX(-1);">
+    <img src="assets/door.webp" style="width:100%;height:100%;object-fit:cover;object-position:left center;display:block;transform:scaleX(-1);">
     <div class="door-crack" style="left:0;background:linear-gradient(to right,rgba(255,215,100,0),transparent);"></div>
 </div>
 </div>
 
 <script>
 (function initIntro() {
+    // ── 只播一次 ──────────────────────────────────────────
+    if (sessionStorage.getItem('intro-played')) {
+        document.getElementById('intro-stage').remove();
+        return;
+    }
+    sessionStorage.setItem('intro-played', '1');
+    // ──────────────────────────────────────────────────────
+
     const stage  = document.getElementById('intro-stage');
     const iL1    = document.getElementById('iL1');
     const iL2    = document.getElementById('iL2');
