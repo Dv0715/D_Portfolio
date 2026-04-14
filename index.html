@@ -764,12 +764,19 @@ body.dark .note-years  { background:rgba(240,200,100,.15); color:#d4b060; border
 
 <script>
 (function initIntro() {
-    // ── 只播一次 ──────────────────────────────────────────
-    if (sessionStorage.getItem('intro-played')) {
+
+    // ── 關掉重開會重播，同 session 內不重播 ──────────────
+    const lastPlayed = localStorage.getItem('intro-last-played');
+    const sessionKey = sessionStorage.getItem('intro-session');
+    
+    if (sessionKey && lastPlayed) {
+        // 同一個 session 內（分頁還開著）→ 不播
         document.getElementById('intro-stage').remove();
         return;
     }
-    sessionStorage.setItem('intro-played', '1');
+    // 新 session（關掉重開）→ 播放並記錄
+    sessionStorage.setItem('intro-session', '1');
+    localStorage.setItem('intro-last-played', Date.now());
     // ──────────────────────────────────────────────────────
 
     const stage  = document.getElementById('intro-stage');
