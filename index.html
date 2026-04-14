@@ -624,6 +624,27 @@ body.dark .note-years  { background:rgba(240,200,100,.15); color:#d4b060; border
     display: flex; align-items: center; justify-content: center;
     pointer-events: all; overflow: hidden;
 }
+
+@media (max-width: 768px) {
+    #door-left img {
+        width: 200%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        left: 0; top: 0;
+        transform: none;
+    }
+    #door-right img {
+        width: 200%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        right: 0; top: 0;
+        transform: scaleX(-1);
+        transform-origin: right center;
+    }
+}
+
 #intro-text-wrap {
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
