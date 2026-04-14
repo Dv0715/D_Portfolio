@@ -191,9 +191,7 @@ body::before {
 .frame {
     background-color: #fff; padding: 12px 12px 35px;
     border: 10px solid var(--color-dark);
-    box-shadow: 0 8px 32px rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.4),
-            inset 0 0 3px rgba(104,104,104,.8),
-            inset 0 1px 0 rgba(255,255,255,.15);
+    box-shadow: 0 8px 32px rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.4), inset 0 0 3px rgba(104,104,104,.8);
     position: absolute; inset: 0;
     backface-visibility: hidden; -webkit-backface-visibility: hidden;
     display: flex; flex-direction: column;
@@ -1411,10 +1409,11 @@ function applyTheme(dark) {
     themeBtn.innerHTML = dark ? '&#x2600;&#xFE0F;' : '&#x1F319;';
     themeBtn.setAttribute('aria-label', dark ? '\u5207\u63DB\u65E5\u9593\u6A21\u5F0F' : '\u5207\u63DB\u5938\u9593\u6A21\u5F0F');
 }
-applyTheme(localStorage.getItem('dolores-theme') !== 'light');
+applyTheme(localStorage.getItem('dolores-theme') === 'dark');
 themeBtn.addEventListener('click', () => {
     const d = !document.body.classList.contains('dark');
-    applyTheme(d); localStorage.setItem('dolores-theme', d?'dark':'light');
+    applyTheme(d);
+    localStorage.setItem('dolores-theme', d ? 'dark' : 'light');
 });
 
 
