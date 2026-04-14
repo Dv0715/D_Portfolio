@@ -627,19 +627,21 @@ body.dark .note-years  { background:rgba(240,200,100,.15); color:#d4b060; border
 
 @media (max-width: 768px) {
     #door-left img {
+        position: absolute;
+        top: 0; left: 0;
         width: 200%;
         height: 100%;
         object-fit: cover;
-        position: absolute;
-        left: 0; top: 0;
+        object-position: left center;
         transform: none;
     }
     #door-right img {
+        position: absolute;
+        top: 0; left: 0;
         width: 200%;
         height: 100%;
         object-fit: cover;
-        position: absolute;
-        right: 0; top: 0;
+        object-position: left center;
         transform: scaleX(-1);
         transform-origin: right center;
     }
