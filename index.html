@@ -476,7 +476,15 @@ body::before {
 .gallery-item .flip-card { opacity: 1; }
 .gallery-item:hover .flip-card { animation: swing 2s ease-in-out infinite; }
 .rope-svg { position:absolute; top:-62px; left:50%; transform:translateX(-50%); width:20px; height:66px; overflow:visible; z-index:10; pointer-events:none; }
-.rope-svg .rope-pin  { fill:var(--color-brown); filter:drop-shadow(1px 1px 1px rgba(0,0,0,.3)); }
+.rope-svg .rope-line {
+    fill: none;
+    stroke: var(--color-rope);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    transition: d .5s cubic-bezier(.34,1.56,.64,1);
+    filter: drop-shadow(1px 2px 2px rgba(0,0,0,.20))
+            drop-shadow(2px 4px 6px rgba(0,0,0,.10));
+}
 .rope-svg .rope-line { stroke:var(--color-rope); stroke-width:1.5; fill:none; stroke-linecap:round; transition:d .5s cubic-bezier(.34,1.56,.64,1); }
 .line { display:none; }
 .flip-card.entering { animation:none !important; pointer-events:none; z-index:10000; }
@@ -1200,10 +1208,20 @@ const WORKS = [
         item.style.setProperty('--drop-delay', `${(i*0.08).toFixed(2)}s`);
         item.innerHTML = `
             <div class="flip-card">
-                <svg class="rope-svg" viewBox="0 0 20 66" xmlns="http://www.w3.org/2000/svg">
-                    <circle class="rope-pin" cx="10" cy="4" r="4"/>
-                    <path class="rope-line" d="M10,7 C10,7 10,66 10,66"/>
-                </svg>
+<svg class="rope-svg" viewBox="0 0 20 66" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <filter id="rope-shadow-${w.id}" x="-50%" y="-20%" width="200%" height="150%">
+            <feDropShadow dx="1.5" dy="2" stdDeviation="1.2" flood-color="rgba(0,0,0,0.35)"/>
+            <feDropShadow dx="0.5" dy="4" stdDeviation="2.5" flood-color="rgba(0,0,0,0.15)"/>
+        </filter>
+        <filter id="pin-shadow-${w.id}" x="-80%" y="-80%" width="360%" height="360%">
+            <feDropShadow dx="1" dy="1.5" stdDeviation="0.8" flood-color="rgba(0,0,0,0.5)"/>
+            <feDropShadow dx="0" dy="3"   stdDeviation="2"   flood-color="rgba(0,0,0,0.2)"/>
+        </filter>
+    </defs>
+    <circle class="rope-pin" cx="10" cy="4" r="4" filter="url(#pin-shadow-${w.id})"/>
+    <path class="rope-line" d="M10,7 C10,7 10,66 10,66" filter="url(#rope-shadow-${w.id})"/>
+</svg>
                 <div class="flip-card-inner">
                     <div class="frame flip-front">
                         <div class="image-box">
@@ -1361,7 +1379,8 @@ document.addEventListener('mousemove', (e) => {
     rafSpotlight = requestAnimationFrame(() => {
         const px = (e.clientX/window.innerWidth*100).toFixed(1)+'%';
         const py = (e.clientY/window.innerHeight*100).toFixed(1)+'%';
-        spotlightEl.style.background = `radial-gradient(circle 380px at ${px} ${py},rgba(255,248,235,.18) 0%,rgba(255,245,225,.06) 45%,transparent 70%)`;
+        spotlightEl.style.background = `radial-gradient(circle 380px at ${px} ${py},
+    rgba(255,220,140,.22) 0%, rgba(255,210,120,.07) 45%, transparent 70%)`;
         rafSpotlight = null;
         const cards = document.querySelectorAll('.flip-card');
         const nearMap = new Map(); let anyNear = false;
